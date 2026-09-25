@@ -1,0 +1,98 @@
+<!doctype html>
+<!--! NAMARI | MIT License | (c) 2026 4n5-Studio -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://generativelanguage.googleapis.com; media-src blob:; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<title>NAMARI — API疎通テスト</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%97%BE%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="test.css">
+</head>
+<body>
+<header>
+  <h1>NAMARI <small>API疎通テスト（開発用）</small></h1>
+  <p class="muted">TTS・方言変換・Voice design を1つずつ呼び出して、レスポンスの形を下のログで確認するページです。送信内容（本文）と受信内容はログに出ますが、APIキーは出しません。</p>
+</header>
+
+<section>
+  <h2>0. APIキー</h2>
+  <div class="row">
+    <input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="AIza..." aria-label="APIキー">
+    <button id="keyShow" type="button">表示</button>
+  </div>
+  <p class="muted">このページはキーを保存しません（ページを閉じると消えます）。取得先: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a></p>
+  <div class="row">
+    <button id="btnCors" type="button">CORS確認（キー不要）</button>
+    <span id="corsOut" class="out"></span>
+  </div>
+</section>
+
+<section>
+  <h2>1. 方言変換（<code>gemini-3.8-flash</code>）</h2>
+  <label>標準語<textarea id="cvText" rows="3">今日はとても暑いですね。<laugh> でも、夕方には涼しくなるそうですよ。</textarea></label>
+  <div class="grid">
+    <label>方言名<input id="cvName" value="大阪弁"></label>
+    <label>強さ<select id="cvStrength"><option value="weak">弱</option><option value="mid" selected>中</option><option value="strong">強</option></select></label>
+  </div>
+  <label>特徴（convertHint）<input id="cvHint" value="語尾「〜や」「〜やん」「〜やで」「〜へん」、「めっちゃ」「ほんま」「あかん」、「〜はる」（軽い敬語）"></label>
+  <div class="row"><button id="btnConvert" type="button" class="primary">変換する</button><button id="btnUseConverted" type="button" disabled>↓ 2. の本文に使う</button></div>
+  <p id="cvOut" class="out"></p>
+</section>
+
+<section>
+  <h2>2. 読み上げ（TTS）</h2>
+  <div class="grid">
+    <label>モデル<select id="ttsModel"></select></label>
+    <label>声（名前 または voice_...）<input id="ttsVoice" value="Kore" list="voiceList"></label>
+  </div>
+  <datalist id="voiceList"></datalist>
+  <label>本文<textarea id="ttsText" rows="3">今日はほんまに暑いなあ。<laugh> せやけど、夕方には涼しなるらしいで。</textarea></label>
+  <label>style（感情・テンポ・声量だけ。空でも可）<input id="ttsStyle" value="cheerful"></label>
+  <div class="row"><button id="btnTts" type="button" class="primary">生成する</button></div>
+  <p id="ttsOut" class="out"></p>
+  <audio id="ttsAudio" controls hidden></audio>
+  <p><a id="ttsDl" hidden>WAVをダウンロード</a></p>
+</section>
+
+<section>
+  <h2>3. Voice design（<code>POST /v1beta/voices</code>）</h2>
+  <label>声の説明（英語・1〜2文）<textarea id="vdPrompt" rows="3">A friendly woman in her 30s, born and raised in Osaka, speaking Japanese with a natural Kansai accent and lively, warm intonation.</textarea></label>
+  <div class="grid">
+    <label>表示名<input id="vdName" value="NAMARI test osaka"></label>
+    <label>性別<select id="vdGender"><option value="">指定なし</option><option value="female" selected>female</option><option value="male">male</option><option value="neutral">neutral</option></select></label>
+    <label>モデル<select id="vdModel"></select></label>
+  </div>
+  <p class="muted">作った声は Google 側に1年間保存されます（1プロジェクト200件まで）。テストが終わったら削除してください。</p>
+  <div class="row"><button id="btnDesign" type="button" class="primary">声を作る</button><button id="btnUseVoice" type="button" disabled>↑ 2. の声に使う</button><button id="btnDeleteVoice" type="button" disabled>この声を削除</button></div>
+  <p id="vdOut" class="out"></p>
+  <audio id="vdAudio" controls hidden></audio>
+</section>
+
+<section>
+  <h2>4. 声の一覧（<code>GET /v1beta/voices</code>）</h2>
+  <div class="grid">
+    <label>language_code<input id="vlLang" value="ja-JP"></label>
+    <label>type<select id="vlType"><option value="">すべて</option><option value="prebuilt">prebuilt</option><option value="prompted">prompted（自分で作った声）</option></select></label>
+    <label>accent<input id="vlAccent" placeholder="例: Kansai"></label>
+    <label>search<input id="vlSearch" placeholder="名前・説明のキーワード"></label>
+  </div>
+  <div class="row"><button id="btnList" type="button" class="primary">一覧を取得</button></div>
+  <p id="vlOut" class="out"></p>
+  <ol id="vlItems" class="items"></ol>
+</section>
+
+<section>
+  <h2>ログ</h2>
+  <div class="row"><button id="btnCopyLog" type="button">ログをコピー</button><button id="btnClearLog" type="button">クリア</button></div>
+  <pre id="log" aria-live="polite"></pre>
+</section>
+
+<script src="../src/01_util.js"></script>
+<script src="../src/02_storage.js"></script>
+<script src="../src/03_api.js"></script>
+<script src="../src/04_dialects.js"></script>
+<script src="test.js"></script>
+</body>
+</html>

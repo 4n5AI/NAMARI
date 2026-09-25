@@ -1,0 +1,145 @@
+<div id="app">
+  <header class="bar">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">訛</span>
+      <span class="word">NAMARI</span>
+      <span class="tag">方言読み上げ</span>
+    </div>
+    <button id="btnSettings" type="button" class="ghost settings-btn" aria-haspopup="dialog">
+      <span id="keyBadge" class="badge">キー未設定</span>設定
+    </button>
+  </header>
+
+  <main class="main">
+    <p class="lead">標準語で書く → 方言を選ぶ → 声を作る。3ステップで、方言の音声ができます。</p>
+
+    <!-- ================= step 1 ================= -->
+    <section class="step" aria-labelledby="h1">
+      <h2 id="h1"><span class="num">1</span>テキストを入力<span class="sub">標準語で書いてください</span></h2>
+      <textarea id="srcText" rows="5" maxlength="1000" placeholder="例：今日はとても暑いですね。でも、夕方には涼しくなるそうですよ。" aria-label="標準語のテキスト"></textarea>
+      <div class="row between">
+        <div class="tags" role="group" aria-label="タグを挿入">
+          <span class="muted small">挿入</span>
+          <span id="tagButtons" class="tag-buttons"></span>
+        </div>
+        <span id="srcCount" class="count" aria-live="polite">0 / 1000</span>
+      </div>
+      <p class="hint">タグ（&lt;laugh&gt; など）は、その位置で笑い・ため息・間・息を入れる合図です。読み上げられません。</p>
+    </section>
+
+    <!-- ================= step 2 ================= -->
+    <section class="step" aria-labelledby="h2">
+      <h2 id="h2"><span class="num">2</span>方言を選ぶ</h2>
+      <div id="regionTabs" class="tabs" role="tablist" aria-label="地方"></div>
+      <div id="dialectCards" class="cards" role="radiogroup" aria-label="方言"></div>
+      <div class="row convert-row">
+        <span class="label">方言の強さ</span>
+        <div id="strength" class="seg" role="radiogroup" aria-label="方言の強さ"></div>
+        <button id="btnConvert" type="button" class="primary">変換</button>
+      </div>
+      <label class="field-label" for="dialectText">方言テキスト<span class="sub">変換後に手で直せます</span></label>
+      <textarea id="dialectText" rows="5" maxlength="2000" placeholder="「変換」を押すと、ここに方言の文章が入ります"></textarea>
+      <p id="convertNote" class="note" aria-live="polite"></p>
+    </section>
+
+    <!-- ================= step 3 ================= -->
+    <section class="step" aria-labelledby="h3">
+      <h2 id="h3"><span class="num">3</span>声を選んで生成</h2>
+      <div class="grid3">
+        <label class="field-label">声<select id="voicePreset"></select></label>
+        <label class="field-label">感情<select id="emotion"></select></label>
+        <label class="field-label">モデル<select id="model"></select></label>
+      </div>
+      <button id="btnGenerate" type="button" class="primary big">音声を生成</button>
+      <p id="genNote" class="note" aria-live="polite"></p>
+      <div id="result" class="result" hidden>
+        <audio id="player" controls preload="auto"></audio>
+        <div class="row between">
+          <a id="btnDownload" class="button" download>WAVをダウンロード</a>
+          <span id="resultMeta" class="muted small"></span>
+        </div>
+      </div>
+      <p id="priceNote" class="hint"></p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>
+      <span>NAMARI v@VERSION@</span> ·
+      <span>MIT License © 2026 4n5-Studio</span> ·
+      <button id="btnTerms" type="button" class="link" aria-haspopup="dialog">利用について</button> ·
+      <a href="https://github.com/4n5AI/NAMARI" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </p>
+    <p class="muted small">生成した音声には、Google の SynthID による電子透かしが入ります。入力したテキストとAPIキーは、Gemini API 以外には送信しません。</p>
+  </footer>
+</div>
+
+<!-- ================= settings ================= -->
+<dialog id="dlgSettings" class="dlg" aria-labelledby="dlgSettingsTitle">
+  <div class="dlg-body">
+    <h2 id="dlgSettingsTitle">APIキーの設定</h2>
+    <p>NAMARI は、あなたの Gemini API キーでブラウザから直接 Gemini API を呼び出します。
+      キーは <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a> で取得できます。</p>
+
+    <div id="keyCurrent" class="key-current" hidden>
+      <span>保存中のキー: <code id="keyMasked"></code> <span id="keyWhere" class="muted small"></span></span>
+      <button id="btnKeyDelete" type="button" class="danger small">キーを削除</button>
+    </div>
+
+    <label class="field-label" for="keyInput">APIキー</label>
+    <div class="row">
+      <input id="keyInput" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="AIza..." class="grow">
+      <button id="btnKeyShow" type="button" class="ghost">表示</button>
+    </div>
+    <fieldset class="radios">
+      <legend class="field-label">保存方法</legend>
+      <label><input type="radio" name="keyMode" value="local" checked> このブラウザに保存（localStorage）</label>
+      <label><input type="radio" name="keyMode" value="session"> このタブを閉じるまで（sessionStorage）</label>
+    </fieldset>
+    <p id="keyError" class="note ng" aria-live="polite"></p>
+
+    <div class="callout">
+      <strong>おすすめ：キーに「HTTPリファラー制限」をかけてください</strong>
+      <p>Google Cloud コンソールの「認証情報」でキーを開き、「ウェブサイトの制限」に次を追加すると、このサイト以外からキーを使えなくなります。</p>
+      <code id="referrerExample" class="block"></code>
+    </div>
+
+    <div class="voices-box">
+      <strong>作成した方言の声</strong>
+      <p class="muted small">方言×声の組み合わせごとに、初回だけ Voice design で声を作り、このブラウザに記録しています（Google 側に1年間保存・1プロジェクト200件まで）。</p>
+      <div class="row between"><span id="voiceCount" class="small"></span><button id="btnVoicesDelete" type="button" class="ghost small">作成した声をすべて削除</button></div>
+      <p id="voicesNote" class="note" aria-live="polite"></p>
+    </div>
+
+    <div class="dlg-actions">
+      <button id="btnSettingsClose" type="button" class="ghost">閉じる</button>
+      <button id="btnKeySave" type="button" class="primary">保存</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ================= terms ================= -->
+<dialog id="dlgTerms" class="dlg" aria-labelledby="dlgTermsTitle">
+  <div class="dlg-body">
+    <h2 id="dlgTermsTitle">利用について</h2>
+    <h3>ツール本体のライセンス</h3>
+    <p>NAMARI は MIT License で公開しています（© 2026 4n5-Studio）。ソースコード：<a href="https://github.com/4n5AI/NAMARI" target="_blank" rel="noopener noreferrer">github.com/4n5AI/NAMARI</a></p>
+    <h3>生成した音声</h3>
+    <p>生成した音声の扱いは、<a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Gemini API 利用規約</a>に従ってください。生成音声には Google の SynthID による電子透かしが入ります。</p>
+    <h3>送信するデータ</h3>
+    <p>入力したテキストとAPIキーは、Gemini API（generativelanguage.googleapis.com）以外には送信しません。キーはこのブラウザにだけ保存され、「設定」からいつでも削除できます。方言の変換と読み上げのリクエストは、Google 側に保存しない設定（store: false）で送っています。</p>
+    <h3>料金の目安（有料枠・2026年12月末まで）</h3>
+    <table class="price">
+      <thead><tr><th>処理</th><th>入力</th><th>出力</th></tr></thead>
+      <tbody>
+        <tr><td>読み上げ（Flash TTS）</td><td>$0.50</td><td>$9.00（音声）</td></tr>
+        <tr><td>読み上げ（Flash-Lite TTS）</td><td>$0.50</td><td>$6.00（音声）</td></tr>
+        <tr><td>方言変換（Gemini 3.8 Flash）</td><td>$0.75</td><td>$3.75</td></tr>
+      </tbody>
+    </table>
+    <p class="muted small">金額は100万トークンあたり（米ドル）。音声は1秒＝25トークンで、Flash TTS なら10秒で約 $0.0023 です。2027年1月から倍額の予定です。無料枠もあります。Voice design（声の作成）の料金は公式の料金表に記載がありません。最新の情報は <a href="https://ai.google.dev/gemini-api/docs/pricing" target="_blank" rel="noopener noreferrer">公式の料金ページ</a> を確認してください。</p>
+    <h3>方言について</h3>
+    <p>方言への書き換えと発音は AI によるもので、実際の話し方と違う場合があります。「β」の方言は特に不安定です。変換後のテキストは手で直してから読み上げられます。</p>
+    <div class="dlg-actions"><button id="btnTermsClose" type="button" class="primary">閉じる</button></div>
+  </div>
+</dialog>

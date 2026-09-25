@@ -1,0 +1,26 @@
+/*! NAMARI | MIT License | (c) 2026 4n5-Studio */
+:root { color-scheme: light dark; --bg: #fafaf7; --fg: #1d1d1b; --muted: #6b6b66; --line: #d9d8d2; --panel: #ffffff; --accent: #c2410c; --ok: #15803d; --ng: #b91c1c; }
+@media (prefers-color-scheme: dark) { :root { --bg: #121211; --fg: #ecebe6; --muted: #9a9993; --line: #34332f; --panel: #1b1b19; --accent: #fb923c; --ok: #4ade80; --ng: #f87171; } }
+* { box-sizing: border-box; }
+body { margin: 0 auto; max-width: 860px; padding: 16px; background: var(--bg); color: var(--fg); font: 15px/1.6 system-ui, -apple-system, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif; }
+h1 { font-size: 22px; margin: 8px 0; } h1 small { font-size: 14px; font-weight: 400; color: var(--muted); }
+h2 { font-size: 17px; margin: 0 0 10px; }
+section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin: 14px 0; }
+label { display: block; margin: 8px 0; font-size: 13px; color: var(--muted); }
+input, select, textarea, button { font: inherit; color: inherit; }
+input, select, textarea { display: block; width: 100%; margin-top: 4px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+textarea { resize: vertical; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+.row input { flex: 1 1 200px; width: auto; margin: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0 12px; }
+button { padding: 8px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.muted { color: var(--muted); font-size: 13px; }
+.out { white-space: pre-wrap; margin: 8px 0; }
+.out.ok { color: var(--ok); } .out.ng { color: var(--ng); }
+audio { width: 100%; margin-top: 6px; }
+.items { font-size: 13px; padding-left: 1.4em; max-height: 320px; overflow: auto; }
+.items li { margin: 4px 0; }
+pre#log { font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; max-height: 60vh; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .92em; }
