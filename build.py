@@ -11,13 +11,16 @@ read = lambda p: open(p, encoding='utf-8').read()
 
 VERSION = read('VERSION').strip()
 BASE = 'https://4n5ai.github.io/NAMARI/'
-TITLE = 'NAMARI — 方言読み上げツール'
-DESCRIPTION = '標準語で書いた文章を、大阪弁・博多弁・津軽弁など日本各地の方言で読み上げるブラウザ完結型ツール。Gemini API を使用。'
+TITLE = 'NAMARI — 方言ボイス・ジェネレーター'
+DESCRIPTION = '標準語で書いた文章を、大阪弁・博多弁・津軽弁など20の方言と、あなた自身の声で読み上げるブラウザ完結型ツール。Gemini API を使用。'
 API_ORIGIN = 'https://generativelanguage.googleapis.com'
 BANNER = f'NAMARI v{VERSION} | MIT License | (c) 2026 4n5-Studio | https://github.com/4n5AI/NAMARI'
-FAVICON = ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='#9ee6c8'/>"
-           "<circle cx='13' cy='14' r='3' fill='#4a2c20'/><circle cx='52' cy='50' r='2.6' fill='#4a2c20'/><circle cx='50' cy='13' r='2' fill='#4a2c20'/>"
-           "<text x='32' y='45' font-size='36' font-weight='700' text-anchor='middle' fill='#4a2c20' font-family='serif'>訛</text></svg>")
+FAVICON = ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>"
+           "<defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#8b5cf6'/><stop offset='1' stop-color='#22d3ee'/></linearGradient></defs>"
+           "<rect width='64' height='64' rx='16' fill='#0a0b10'/><g fill='url(#g)'>"
+           "<rect x='12' y='26' width='6' height='12' rx='3'/><rect x='21' y='17' width='6' height='30' rx='3'/>"
+           "<rect x='30' y='10' width='6' height='44' rx='3'/><rect x='39' y='20' width='6' height='24' rx='3'/>"
+           "<rect x='48' y='27' width='6' height='10' rx='3'/></g></svg>")
 
 sources = sorted(glob.glob('src/*.js'))
 script = '\n' + '\n'.join(read(f) for f in sources).replace('@VERSION@', VERSION) + '\n'
@@ -60,8 +63,8 @@ html = f'''<!doctype html>
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="{TITLE}">
 <meta name="twitter:description" content="{DESCRIPTION}">
-<meta name="theme-color" content="#4a2c20" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#120c09" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f6fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0b10" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="{favicon}">
 <style>{style}</style>
 </head>

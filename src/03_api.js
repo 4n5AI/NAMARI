@@ -214,7 +214,32 @@ N.createVoice = async ({ key, model, prompt, displayName, gender, languageCode =
   return { id: String(v.id).replace(/^voices\//, ''), sample: s, raw: v };
 };
 
-const voicePath = id => '/voices/' + encodeURIComponent(String(id).replace(/^voices\//, ''));
+/* Voice replication: the user's own voice from a 10–30 s sample + a recorded consent statement.
+   store:true -> persistent voice_... (1 year); store:false -> voicekey_... (7 days, kept by the client) */
+N.CONSENT_JA = '私はこの音声の所有者であり、Googleがこの音声を使用して音声合成モデルを作成することを承認します。';
+N.replicateVoice = async ({ key, model, name, source, consent, store = true, signal }) => {
+  const voice = {
+    model, type: 'replicated',
+    replicated: {
+      source_audio: { mime_type: 'audio/wav', data: N.bytesToB64(source) },
+      consent_audio: { mime_type: 'audio/wav', data: N.bytesToB64(consent) },
+    },
+  };
+  if (name && store) voice.display_name = name;
+  let v;
+  try {
+    v = await call(key, 'POST', '/voices', { store, voice }, { signal });
+  } catch (err) {
+    if (err instanceof ApiError && err.kind === 'bad')
+      err.message = '声を登録できませんでした。同意文を一字一句そのまま読んだか、2つの録音が同じ人・同じマイク・静かな場所で録音されているかを確認して、録り直してください。';
+    throw err;
+  }
+  const id = v && (v.id || v.key);
+  if (!id) throw new ApiError('声の登録結果にIDが含まれていませんでした。', { kind: 'empty' });
+  return { id: String(id).replace(/^voices\//, ''), stateless: !v.id, raw: v };
+};
+
+const voicePath = id =>'/voices/' + encodeURIComponent(String(id).replace(/^voices\//, ''));
 N.getVoice = ({ key, id, signal }) => call(key, 'GET', voicePath(id), null, { signal });
 N.deleteVoice = ({ key, id, signal }) => call(key, 'DELETE', voicePath(id), null, { signal });
 
@@ -261,7 +286,17 @@ N.resolveVoice = async ({ key, dialect, preset, model, signal, onStage }) => {
 
 /* resolve the voice, then TTS. A cached voice that has expired / been deleted is recreated
    once; a designed voice the model refuses falls back to the preset's prebuilt voice. */
-N.synthesize = async ({ key, dialect, preset, model, text, style, signal, onStage, onRetry }) => {
+N.synthesize = async ({ key, dialect, preset, model, text, style, fixedVoice, signal, onStage, onRetry }) => {
+  if (fixedVoice) {                                    // the user's own (replicated) voice: no design / fallback
+    if (onStage) onStage('speak');
+    try {
+      const res = await N.tts({ key, model, text, style, voice: fixedVoice, signal, onRetry });
+      return Object.assign(res, { voice: fixedVoice, designed: true, own: true, voiceCreated: false, voiceError: null });
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'notfound') err.message = '自分の声が見つかりません。期限切れか削除済みの可能性があります。「自分の声」から登録し直してください。';
+      throw err;
+    }
+  }
   let v = await N.resolveVoice({ key, dialect, preset, model, signal, onStage });
   const speak = voice => { if (onStage) onStage('speak'); return N.tts({ key, model, text, style, voice, signal, onRetry }); };
   let res;

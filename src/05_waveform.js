@@ -97,7 +97,9 @@ N.Waveform = class {
     for (let i = 0; i < peaks.length; i++) top = Math.max(top, Math.abs(peaks[i]));
     const gain = top > 0 ? Math.min(1 / top, 8) : 1;          // quiet takes still read as a shape
     const bars = Math.max(1, Math.floor((w + GAP) / (BAR + GAP)));
-    const played = col('--wave-played'), rest = col('--wave');
+    const played = g.createLinearGradient(0, 0, w, 0), rest = col('--wave');   // played part carries the voice signal gradient
+    played.addColorStop(0, col('--g1'));
+    played.addColorStop(1, col('--g2'));
     for (let i = 0; i < bars; i++) {
       const s = Math.floor((i * buckets) / bars), e = Math.max(s + 1, Math.floor(((i + 1) * buckets) / bars));
       let amp = 0;

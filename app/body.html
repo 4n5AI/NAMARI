@@ -1,21 +1,26 @@
 <div id="app">
   <header class="bar">
-    <div class="brand">
-      <span class="mark" aria-hidden="true">訛</span>
+    <a class="brand" href="./" aria-label="NAMARI トップ">
+      <span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
       <span class="word">NAMARI</span>
-      <span class="tag">方言読み上げ</span>
-    </div>
+      <span class="tag">Dialect Voice Studio</span>
+    </a>
     <button id="btnSettings" type="button" class="ghost settings-btn" aria-haspopup="dialog">
       <span id="keyBadge" class="badge">キー未設定</span>設定
     </button>
   </header>
 
   <main class="main">
-    <p class="lead">標準語で書く → 方言を選ぶ → 声を作る。3ステップで、方言の音声ができます。</p>
+    <section class="hero" aria-labelledby="heroTitle">
+      <p class="eyebrow">DIALECT VOICE STUDIO</p>
+      <h1 id="heroTitle" class="hero-title">その言葉を、<span class="nowrap"><span class="grad">あの町の声</span>で。</span></h1>
+      <p class="lead">標準語で書いて、方言と声を選ぶだけ。20の方言と、あなた自身の声で読み上げます。</p>
+      <div id="heroWave" class="hero-wave" aria-hidden="true"></div>
+    </section>
 
     <!-- ================= step 1 ================= -->
     <section class="step" aria-labelledby="h1">
-      <h2 id="h1"><span class="num">1</span>テキストを入力<span class="sub">標準語で書いてください</span></h2>
+      <h2 id="h1"><span class="num">01</span><span class="kicker">TEXT</span>テキストを入力<span class="sub">標準語で書いてください</span></h2>
       <textarea id="srcText" rows="5" maxlength="1000" placeholder="例：今日はとても暑いですね。でも、夕方には涼しくなるそうですよ。" aria-label="標準語のテキスト"></textarea>
       <div class="row between">
         <div class="tags" role="group" aria-label="タグを挿入">
@@ -29,7 +34,7 @@
 
     <!-- ================= step 2 ================= -->
     <section class="step" aria-labelledby="h2">
-      <h2 id="h2"><span class="num">2</span>方言を選ぶ</h2>
+      <h2 id="h2"><span class="num">02</span><span class="kicker">DIALECT</span>方言を選ぶ</h2>
       <div id="regionTabs" class="tabs" role="tablist" aria-label="地方"></div>
       <div id="dialectCards" class="cards" role="radiogroup" aria-label="方言"></div>
       <div class="row convert-row">
@@ -44,12 +49,16 @@
 
     <!-- ================= step 3 ================= -->
     <section class="step" aria-labelledby="h3">
-      <h2 id="h3"><span class="num">3</span>声を選んで生成</h2>
+      <h2 id="h3"><span class="num">03</span><span class="kicker">VOICE</span>声を選んで生成</h2>
       <div class="grid3">
-        <label class="field-label">声<select id="voicePreset"></select></label>
+        <div class="voice-field">
+          <label class="field-label">声<select id="voicePreset"></select></label>
+          <button id="btnMyVoice" type="button" class="link-btn" aria-haspopup="dialog"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>自分の声を登録・管理</button>
+        </div>
         <label class="field-label">感情<select id="emotion"></select></label>
         <label class="field-label">モデル<select id="model"></select></label>
       </div>
+      <p id="voiceNote" class="hint" hidden>自分の声では、なまりは方言テキスト（言葉づかい）で表現されます。声の質やアクセントは、登録した声に近くなります。</p>
       <button id="btnGenerate" type="button" class="primary big">音声を生成</button>
       <p id="genNote" class="note" aria-live="polite"></p>
       <div id="result" class="result" hidden>
@@ -66,7 +75,7 @@
 
     <!-- ================= history ================= -->
     <section class="step history" aria-labelledby="hH">
-      <h2 id="hH"><span class="num num-icon" aria-hidden="true">↺</span>履歴<span id="histCount" class="sub"></span>
+      <h2 id="hH"><span class="num num-icon" aria-hidden="true">↺</span><span class="kicker">HISTORY</span>履歴<span id="histCount" class="sub"></span>
         <button id="btnHistClear" type="button" class="ghost small push">すべて削除</button></h2>
       <p id="histNote" class="note" aria-live="polite"></p>
       <ol id="histList" class="hist-list"></ol>
@@ -84,6 +93,67 @@
     <p class="muted small">生成した音声には、Google の SynthID による電子透かしが入ります。入力したテキストとAPIキーは、Gemini API 以外には送信しません。</p>
   </footer>
 </div>
+
+<!-- ================= my voice (Voice replication) ================= -->
+<dialog id="dlgMyVoice" class="dlg dlg-wide" aria-labelledby="dlgMyVoiceTitle">
+  <div class="dlg-body">
+    <p class="eyebrow">MY VOICE</p>
+    <h2 id="dlgMyVoiceTitle">自分の声を登録</h2>
+    <p>あなたの声を録音すると、その声で方言を読み上げられます（Gemini API の Voice replication）。<strong>登録できるのは、あなた自身の声だけです。</strong></p>
+    <p id="mvUnsupported" class="note ng" hidden>このブラウザではマイク録音を使えません。最新の Chrome・Safari・Edge・Firefox で、https のページから開いてください。</p>
+
+    <ol class="mv-steps">
+      <li class="mv-step">
+        <h3><span class="step-dot">A</span>声のサンプル<span class="sub">10〜30秒</span></h3>
+        <p class="hint">静かな場所で、下の文章をふだんの話し方で読んでください（自分の声のファイルを使うこともできます）。</p>
+        <blockquote class="script">こんにちは。今日は、わたしの声を登録するために録音しています。天気のいい日は、少し遠回りをして散歩するのが好きです。駅前のパン屋さんで焼きたてのパンを買って、公園のベンチでゆっくり食べるのが、ちょっとした楽しみです。</blockquote>
+        <div id="recSource" class="rec" data-max="30" data-min="10">
+          <canvas class="rec-meter" aria-hidden="true"></canvas>
+          <div class="rec-row">
+            <button type="button" class="rec-btn"><span class="rec-dot" aria-hidden="true"></span><span class="rec-label">録音する</span></button>
+            <span class="rec-time">0:00 / 0:30</span>
+            <label class="file-btn">ファイルから<input type="file" accept="audio/*" class="rec-file"></label>
+          </div>
+          <audio class="rec-audio" controls hidden></audio>
+          <p class="note rec-note" aria-live="polite"></p>
+        </div>
+      </li>
+      <li class="mv-step">
+        <h3><span class="step-dot">B</span>同意の録音</h3>
+        <p class="hint">同じ人が、同じマイク・同じ場所で、次の文を一字一句そのまま読み上げてください。</p>
+        <blockquote id="consentText" class="script consent"></blockquote>
+        <div id="recConsent" class="rec" data-max="20" data-min="3">
+          <canvas class="rec-meter" aria-hidden="true"></canvas>
+          <div class="rec-row">
+            <button type="button" class="rec-btn"><span class="rec-dot" aria-hidden="true"></span><span class="rec-label">録音する</span></button>
+            <span class="rec-time">0:00 / 0:20</span>
+          </div>
+          <audio class="rec-audio" controls hidden></audio>
+          <p class="note rec-note" aria-live="polite"></p>
+        </div>
+      </li>
+      <li class="mv-step">
+        <h3><span class="step-dot">C</span>名前と保存方法</h3>
+        <label class="field-label" for="mvName">声の名前</label>
+        <input id="mvName" maxlength="40" placeholder="例：わたしの声" autocomplete="off">
+        <fieldset class="radios">
+          <legend class="field-label">保存方法</legend>
+          <label><input type="radio" name="mvStore" value="store" checked> Google に保存（1年間。どの端末でも同じキーで使えます）</label>
+          <label><input type="radio" name="mvStore" value="stateless"> Google に保存しない（7日間だけ使えるキーを、このブラウザに保存）</label>
+        </fieldset>
+        <label class="check"><input id="mvAgree" type="checkbox"> 録音したのは私自身の声で、本人として同意しています。他人の声は登録しません。</label>
+        <button id="btnMvCreate" type="button" class="primary wide" disabled>この声を登録</button>
+        <p id="mvNote" class="note" aria-live="polite"></p>
+      </li>
+    </ol>
+
+    <h3 class="mv-list-title">登録した声</h3>
+    <ul id="mvList" class="mv-list"></ul>
+    <p id="mvEmpty" class="hint">まだ登録した声はありません。</p>
+
+    <div class="dlg-actions"><button id="btnMvClose" type="button" class="ghost">閉じる</button></div>
+  </div>
+</dialog>
 
 <!-- ================= settings ================= -->
 <dialog id="dlgSettings" class="dlg" aria-labelledby="dlgSettingsTitle">
@@ -149,6 +219,8 @@
       </tbody>
     </table>
     <p class="muted small">金額は100万トークンあたり（米ドル）。音声は1秒＝25トークンで、Flash TTS なら10秒で約 $0.0023 です。2027年1月から倍額の予定です。無料枠もあります。Voice design（声の作成）の料金は公式の料金表に記載がありません。最新の情報は <a href="https://ai.google.dev/gemini-api/docs/pricing" target="_blank" rel="noopener noreferrer">公式の料金ページ</a> を確認してください。</p>
+    <h3>自分の声（Voice replication）</h3>
+    <p>登録できるのは、あなた自身の声だけです。他人の声を、本人の同意なく複製しないでください。録音した音声は声の登録のために Gemini API にだけ送信し、このブラウザには保存しません（保存するのは声のIDまたはキーだけです）。「Google に保存しない」を選んだ場合のキー（voicekey_...）は、持っている人なら誰でもその声を使えるため、他人に共有しないでください。</p>
     <h3>方言について</h3>
     <p>方言への書き換えと発音は AI によるもので、実際の話し方と違う場合があります。「β」の方言は特に不安定です。変換後のテキストは手で直してから読み上げられます。</p>
     <div class="dlg-actions"><button id="btnTermsClose" type="button" class="primary">閉じる</button></div>

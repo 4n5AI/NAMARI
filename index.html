@@ -1,128 +1,143 @@
 <!doctype html>
-<!--! NAMARI v0.3.0 | MIT License | (c) 2026 4n5-Studio | https://github.com/4n5AI/NAMARI -->
+<!--! NAMARI v0.4.0 | MIT License | (c) 2026 4n5-Studio | https://github.com/4n5AI/NAMARI -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-oVrYTYPhdss2BIdPQHra05rXVCRemMMWjTpCpqes8to='; style-src 'sha256-3HkWWsBDTAVoWpF99PaS9NgV2n1GyB6p/jugfGFOgwM='; connect-src https://generativelanguage.googleapis.com; img-src data:; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
-<title>NAMARI — 方言読み上げツール</title>
-<meta name="description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など日本各地の方言で読み上げるブラウザ完結型ツール。Gemini API を使用。">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-04/9io9MC0v145Qa3Qc6sNPk4u8KSLlijhX8Oev4+xs='; style-src 'sha256-HS53duc2UgQvxDOVb/RD93e+1YOggpgDGGSLTR7l0VI='; connect-src https://generativelanguage.googleapis.com; img-src data:; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>NAMARI — 方言ボイス・ジェネレーター</title>
+<meta name="description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など20の方言と、あなた自身の声で読み上げるブラウザ完結型ツール。Gemini API を使用。">
 <link rel="canonical" href="https://4n5ai.github.io/NAMARI/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NAMARI">
-<meta property="og:title" content="NAMARI — 方言読み上げツール">
-<meta property="og:description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など日本各地の方言で読み上げるブラウザ完結型ツール。Gemini API を使用。">
+<meta property="og:title" content="NAMARI — 方言ボイス・ジェネレーター">
+<meta property="og:description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など20の方言と、あなた自身の声で読み上げるブラウザ完結型ツール。Gemini API を使用。">
 <meta property="og:url" content="https://4n5ai.github.io/NAMARI/">
 <meta property="og:locale" content="ja_JP">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="NAMARI — 方言読み上げツール">
-<meta name="twitter:description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など日本各地の方言で読み上げるブラウザ完結型ツール。Gemini API を使用。">
-<meta name="theme-color" content="#4a2c20" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#120c09" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%239ee6c8'/%3E%3Ccircle cx='13' cy='14' r='3' fill='%234a2c20'/%3E%3Ccircle cx='52' cy='50' r='2.6' fill='%234a2c20'/%3E%3Ccircle cx='50' cy='13' r='2' fill='%234a2c20'/%3E%3Ctext x='32' y='45' font-size='36' font-weight='700' text-anchor='middle' fill='%234a2c20' font-family='serif'%3E%E8%A8%9B%3C/text%3E%3C/svg%3E">
+<meta name="twitter:title" content="NAMARI — 方言ボイス・ジェネレーター">
+<meta name="twitter:description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など20の方言と、あなた自身の声で読み上げるブラウザ完結型ツール。Gemini API を使用。">
+<meta name="theme-color" content="#f5f6fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0b10" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%230a0b10'/%3E%3Cg fill='url%28%23g%29'%3E%3Crect x='12' y='26' width='6' height='12' rx='3'/%3E%3Crect x='21' y='17' width='6' height='30' rx='3'/%3E%3Crect x='30' y='10' width='6' height='44' rx='3'/%3E%3Crect x='39' y='20' width='6' height='24' rx='3'/%3E%3Crect x='48' y='27' width='6' height='10' rx='3'/%3E%3C/g%3E%3C/svg%3E">
 <style>
 /*! NAMARI | MIT License | (c) 2026 4n5-Studio */
-/* ---------- chocolate mint: mint ice cream + chocolate chips ----------
-   light = mint base, chocolate ink / buttons;  dark = chocolate base, mint ink / buttons */
+/* ---------- "studio / signal": ink + a violet -> cyan voice signal ----------
+   the gradient is reserved for things that mean "voice": logo, wave, generate, levels */
 :root {
   color-scheme: light;
-  --bg: #dcf4e8;
-  --panel: #fbfefc;
-  --raised: #eef9f4;
-  --field: #f5fcf9;
-  --line: #bfe4d2;
-  --line2: #97cfb6;
-  --text: #3b251b;
-  --muted: #7a5a4a;
-  --accent: #4a2c20;          /* chocolate */
-  --accent-ink: #c9f3df;      /* mint on chocolate */
-  --link: #17745a;
-  --sel: #c8efdc;
-  --ok: #17745a;
-  --ng: #b3261e;
-  --warn-bg: #fbeedd;
-  --warn-line: #e5c39c;
-  --header-bg: #4a2c20;
-  --header-ink: #c9f3df;
-  --header-line: #9ee6c8;
-  --chip: rgba(74, 44, 32, 0.2);
-  --wave: #a4d8c1;
-  --wave-played: #4a2c20;
-  --wave-head: #17745a;
+  --bg: #f5f6fb;
+  --glow-a: rgba(124, 58, 237, 0.10);
+  --glow-b: rgba(6, 182, 212, 0.10);
+  --panel: #ffffff;
+  --raised: #f3f4f9;
+  --field: #fafbff;
+  --line: #e4e6f0;
+  --line2: #cfd3e1;
+  --text: #11131a;
+  --muted: #5b6275;
+  --g1: #7c3aed;
+  --g2: #06b6d4;
+  --btn-a: #7c3aed;
+  --btn-b: #0e7490;
+  --link: #6d28d9;
+  --sel: #f2edff;
+  --sel-line: #7c3aed;
+  --ok: #047857;
+  --ng: #b91c1c;
+  --warn-bg: #fff8e6;
+  --warn-line: #f0d48c;
+  --rec: #e11d48;
+  --wave: #d9dce8;
+  --wave-head: #11131a;
+  --shadow: 0 1px 2px rgba(17, 19, 26, 0.04), 0 8px 24px -12px rgba(17, 19, 26, 0.10);
   --ui: system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
-  --serif: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
-  --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
-  --r: 10px;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --r: 12px;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --bg: #1b120e;
-    --panel: #251913;
-    --raised: #2e1f18;
-    --field: #1f1510;
-    --line: #3e2b21;
-    --line2: #5a4132;
-    --text: #e3f7ee;
-    --muted: #a3c4b6;
-    --accent: #8fe3c4;        /* mint */
-    --accent-ink: #231610;    /* chocolate on mint */
-    --link: #8fe3c4;
-    --sel: rgba(143, 227, 196, 0.13);
-    --ok: #7fdcb5;
-    --ng: #ff8f84;
-    --warn-bg: #2f2216;
-    --warn-line: #5f4727;
-    --header-bg: #120c09;
-    --header-ink: #8fe3c4;
-    --header-line: #8fe3c4;
-    --chip: rgba(0, 0, 0, 0.28);
-    --wave: #5a4132;
-    --wave-played: #8fe3c4;
-    --wave-head: #e3f7ee;
+    --bg: #0a0b10;
+    --glow-a: rgba(124, 58, 237, 0.22);
+    --glow-b: rgba(6, 182, 212, 0.14);
+    --panel: #12141b;
+    --raised: #191c25;
+    --field: #0e1016;
+    --line: #242836;
+    --line2: #343a4c;
+    --text: #eef0f7;
+    --muted: #8f95aa;
+    --g1: #8b5cf6;
+    --g2: #22d3ee;
+    --btn-a: #7c3aed;
+    --btn-b: #0e7490;
+    --link: #b3a1ff;
+    --sel: rgba(139, 92, 246, 0.14);
+    --sel-line: #8b5cf6;
+    --ok: #34d399;
+    --ng: #fb7185;
+    --warn-bg: rgba(251, 191, 36, 0.08);
+    --warn-line: rgba(251, 191, 36, 0.35);
+    --rec: #fb3f5f;
+    --wave: #2b3040;
+    --wave-head: #ffffff;
+    --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 32px -18px rgba(0, 0, 0, 0.7);
   }
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
-  margin: 0; color: var(--text); font: 16px/1.7 var(--ui); -webkit-font-smoothing: antialiased;
-  background-color: var(--bg);
-  /* scattered chocolate chips */
-  background-image:
-    radial-gradient(5px 3.5px at 24px 30px, var(--chip) 96%, transparent),
-    radial-gradient(3px 4px at 130px 64px, var(--chip) 96%, transparent),
-    radial-gradient(4.5px 3px at 74px 156px, var(--chip) 96%, transparent),
-    radial-gradient(3.5px 3.5px at 196px 118px, var(--chip) 96%, transparent),
-    radial-gradient(2.5px 3px at 168px 206px, var(--chip) 96%, transparent);
-  background-size: 230px 230px;
+  margin: 0; min-height: 100vh; color: var(--text); font: 16px/1.7 var(--ui); -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(900px 520px at 8% -8%, var(--glow-a), transparent 62%),
+    radial-gradient(760px 480px at 100% -4%, var(--glow-b), transparent 60%),
+    var(--bg);
+  background-repeat: no-repeat;
 }
 button, input, select, textarea { font: inherit; color: inherit; }
 a { color: var(--link); }
-:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+:focus-visible { outline: 2px solid var(--g1); outline-offset: 2px; }
+.grad { background: linear-gradient(90deg, var(--g1), var(--g2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; flex: none; }
 
-/* ---------- header: a chocolate bar with a mint edge ---------- */
-.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: var(--header-bg); color: var(--header-ink); border-bottom: 3px solid var(--header-line); }
-.brand { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-.brand .mark { font: 700 26px/1 var(--serif); color: var(--header-line); }
-.brand .word { font: 700 15px/1 var(--ui); letter-spacing: 0.18em; color: var(--header-ink); }
-.brand .tag { font-size: 12px; color: var(--header-ink); opacity: 0.75; white-space: nowrap; }
-.bar .settings-btn { display: inline-flex; align-items: center; gap: 8px; color: var(--header-ink); border-color: var(--header-line); background: transparent; }
-.bar .settings-btn:hover { background: rgba(158, 230, 200, 0.12); border-color: var(--header-line); }
-.bar :focus-visible { outline-color: var(--header-line); }
-.badge { font-size: 11px; line-height: 1; padding: 4px 7px; border-radius: 999px; background: #ff8f84; color: #2a0f0b; font-weight: 700; }
-.badge.ok { background: var(--header-line); color: #231610; }
+/* ---------- header ---------- */
+.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; color: inherit; text-decoration: none; }
+.logo { display: inline-flex; align-items: center; gap: 2.5px; height: 24px; }
+.logo i { display: block; width: 3.5px; border-radius: 2px; background: linear-gradient(180deg, var(--g1), var(--g2)); transform-origin: center; }
+.logo i:nth-child(1) { height: 9px; } .logo i:nth-child(2) { height: 17px; } .logo i:nth-child(3) { height: 24px; }
+.logo i:nth-child(4) { height: 14px; } .logo i:nth-child(5) { height: 7px; }
+.brand .word { font: 800 17px/1 var(--ui); letter-spacing: 0.22em; }
+.brand .tag { font: 500 11px/1 var(--mono); color: var(--muted); letter-spacing: 0.08em; white-space: nowrap; }
+.settings-btn { display: inline-flex; align-items: center; gap: 8px; }
+.badge { font: 600 11px/1 var(--ui); padding: 5px 8px; border-radius: 999px; background: color-mix(in srgb, var(--ng) 16%, transparent); color: var(--ng); }
+.badge.ok { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
 
-/* ---------- layout ---------- */
-.main { max-width: 760px; margin: 0 auto; padding: 8px 16px 24px; }
-.lead { margin: 14px 2px 6px; color: var(--muted); font-size: 15px; }
-.step { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 14px 0; box-shadow: 0 1px 0 var(--line); }
-.step h2 { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 12px; font-size: 18px; }
-.num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 15px; font-weight: 700; }
-.num-icon { font-size: 16px; }
-.sub { font-size: 13px; font-weight: 400; color: var(--muted); }
-.push { margin-left: auto; }
+/* ---------- hero ---------- */
+.main { max-width: 780px; margin: 0 auto; padding: 0 16px 24px; }
+.hero { padding: 40px 2px 8px; }
+.eyebrow { margin: 0 0 10px; font: 600 11px/1 var(--mono); letter-spacing: 0.28em; color: var(--muted); }
+.nowrap { white-space: nowrap; }
+.hero-title { margin: 0; font-size: clamp(28px, 6.4vw, 46px); line-height: 1.22; font-weight: 800; letter-spacing: -0.01em; }
+.lead { margin: 12px 0 0; color: var(--muted); font-size: 15px; }
+.hero-wave { display: flex; align-items: center; gap: 3px; height: 56px; margin: 22px 0 6px; overflow: hidden; }
+.hero-wave span { flex: 1 1 0; min-width: 2px; border-radius: 3px; background: linear-gradient(180deg, var(--g1), var(--g2)); opacity: 0.85; transform-origin: center; animation: breathe 2.8s ease-in-out infinite alternate; }
+.live .hero-wave span { animation-duration: 0.55s; opacity: 1; }
+.live .logo i { animation: breathe 0.5s ease-in-out infinite alternate; }
+.live .logo i:nth-child(2n) { animation-delay: -0.25s; }
+@keyframes breathe { from { transform: scaleY(0.35); } to { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* ---------- steps ---------- */
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 20px; margin: 16px 0; box-shadow: var(--shadow); }
+.step h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 14px; font-size: 19px; font-weight: 800; letter-spacing: 0.01em; }
+.num { font: 700 13px/1 var(--mono); letter-spacing: 0.04em; background: linear-gradient(90deg, var(--g1), var(--g2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.num-icon { font-size: 15px; }
+.kicker { font: 600 11px/1 var(--mono); letter-spacing: 0.22em; color: var(--muted); }
+.sub { font-size: 13px; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+.push { margin-left: auto; align-self: center; }
 .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
 .row.between { justify-content: space-between; }
 .grow { flex: 1 1 200px; min-width: 0; }
@@ -133,104 +148,140 @@ a { color: var(--link); }
 .note:empty { display: none; }
 .note.ok { color: var(--ok); }
 .note.ng { color: var(--ng); }
-.note.warn { color: var(--text); background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 8px; padding: 8px 10px; }
+.note.warn { color: var(--text); background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 10px; padding: 8px 12px; }
 .note button { margin-left: 8px; }
 
 /* ---------- controls ---------- */
-textarea, input:not([type=radio]), select { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--field); }
+textarea, input:not([type=radio]):not([type=checkbox]):not([type=file]), select { width: 100%; min-width: 0; padding: 11px 13px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--field); transition: border-color 0.15s, box-shadow 0.15s; }
+textarea:focus, input:focus, select:focus { outline: none; border-color: var(--g1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--g1) 22%, transparent); }
 textarea { resize: vertical; line-height: 1.8; }
 select { cursor: pointer; }
-.field-label { display: block; margin: 12px 0 4px; font-size: 13px; color: var(--muted); }
-.field-label select { margin-top: 4px; color: var(--text); font-size: 15px; }
-.label { font-size: 14px; color: var(--muted); }
-input[type=radio] { accent-color: var(--accent); }
-button, .button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--panel); cursor: pointer; text-decoration: none; color: var(--text); line-height: 1.4; }
-button:hover, .button:hover { border-color: var(--accent); }
-button:disabled { opacity: 0.5; cursor: not-allowed; }
-button.primary, .button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
-button.primary:hover { filter: brightness(1.12); }
-button.ghost { background: transparent; }
-button.danger { color: var(--ng); border-color: var(--ng); background: transparent; }
-button.small { padding: 4px 10px; font-size: 13px; }
-button.big { width: 100%; padding: 13px 16px; font-size: 17px; margin-top: 14px; border-radius: 999px; }
-button.link { padding: 0; border: 0; background: none; color: var(--link); text-decoration: underline; font-size: inherit; }
+.field-label { display: block; margin: 12px 0 5px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted); }
+.field-label select { margin-top: 5px; color: var(--text); font-size: 15px; font-weight: 400; letter-spacing: 0; }
+.label { font-size: 13px; font-weight: 600; color: var(--muted); }
+input[type=radio], input[type=checkbox] { accent-color: var(--g1); width: 16px; height: 16px; flex: none; }
+button, .button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 15px; border: 1px solid var(--line2); border-radius: 999px; background: transparent; cursor: pointer; text-decoration: none; color: var(--text); line-height: 1.4; transition: border-color 0.15s, background-color 0.15s, filter 0.15s, box-shadow 0.15s; }
+button:hover, .button:hover { border-color: var(--text); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.primary, .button.primary { border: 0; color: #fff; font-weight: 700; background: linear-gradient(95deg, var(--btn-a), var(--btn-b)); box-shadow: 0 8px 24px -10px var(--g1); }
+button.primary:hover:not(:disabled) { filter: brightness(1.1); }
+button.danger { color: var(--ng); border-color: color-mix(in srgb, var(--ng) 50%, transparent); }
+button.small { padding: 4px 11px; font-size: 13px; }
+button.big { width: 100%; padding: 15px 18px; font-size: 17px; margin-top: 16px; letter-spacing: 0.04em; }
+button.wide { width: 100%; margin-top: 12px; padding: 12px 16px; }
+button.link { padding: 0; border: 0; background: none; color: var(--link); text-decoration: underline; font-size: inherit; border-radius: 0; }
+.link-btn { margin-top: 6px; padding: 2px 0; border: 0; border-radius: 0; background: none; color: var(--link); font-size: 13px; font-weight: 600; }
+.link-btn:hover { text-decoration: underline; }
 .tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .tag-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
-.tag-buttons button { padding: 3px 10px; font-size: 13px; border-radius: 999px; background: var(--raised); }
-.count { font: 13px var(--mono); color: var(--muted); }
+.tag-buttons button { padding: 3px 11px; font-size: 13px; background: var(--raised); border-color: var(--line); }
+.count { font: 12px var(--mono); color: var(--muted); }
 .count.over { color: var(--ng); }
 
-/* ---------- step 2: regions & dialects ---------- */
+/* ---------- step 2 ---------- */
 .tabs { position: relative; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
-.tabs button { flex: none; padding: 6px 12px; border-radius: 999px; font-size: 14px; background: var(--raised); }
-.tabs button[aria-selected=true] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
-.tabs button .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--link); margin-left: 2px; }
-.tabs button[aria-selected=true] .dot { background: var(--accent-ink); }
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 12px 0 4px; }
-.card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 12px; text-align: left; border-radius: 12px; background: var(--raised); }
-.card .name { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 6px; }
+.tabs button { flex: none; padding: 6px 14px; font-size: 14px; background: var(--raised); border-color: var(--line); }
+.tabs button[aria-selected=true] { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: 700; }
+.tabs button .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(90deg, var(--g1), var(--g2)); margin-left: 2px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 8px; margin: 12px 0 4px; }
+.card { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 12px 13px; text-align: left; border-radius: 14px; background: var(--raised); border-color: var(--line); }
+.card:hover { border-color: var(--line2); }
+.card .name { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 6px; }
 .card .sample { font-size: 12px; color: var(--muted); line-height: 1.5; }
-.card .beta { font-size: 11px; font-weight: 700; padding: 0 6px; border-radius: 999px; border: 1px solid var(--muted); color: var(--muted); }
-.card[aria-checked=true] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: var(--sel); }
-.convert-row { margin-top: 14px; }
-.seg { display: inline-flex; border: 1px solid var(--line2); border-radius: var(--r); overflow: hidden; }
-.seg button { border: 0; border-radius: 0; padding: 7px 16px; background: transparent; }
-.seg button + button { border-left: 1px solid var(--line2); }
-.seg button[aria-checked=true] { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
-#btnConvert { margin-left: auto; min-width: 96px; }
+.card .beta { font: 700 10px/1.6 var(--mono); padding: 0 6px; border-radius: 999px; border: 1px solid var(--line2); color: var(--muted); }
+.card[aria-checked=true] { background: var(--sel); border-color: var(--sel-line); box-shadow: inset 0 0 0 1px var(--sel-line); }
+.convert-row { margin-top: 16px; }
+.seg { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--line); border-radius: 999px; background: var(--raised); }
+.seg button { border: 0; padding: 5px 16px; background: transparent; }
+.seg button[aria-checked=true] { background: var(--text); color: var(--bg); font-weight: 700; }
+#btnConvert { margin-left: auto; min-width: 104px; }
 
 /* ---------- step 3 ---------- */
-.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 12px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 12px; align-items: start; }
 .grid3 .field-label { margin-top: 0; }
-.result { margin-top: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--raised); }
-.result-title { display: block; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
-.result audio { width: 100%; margin-top: 8px; }
-.wave { display: block; width: 100%; height: 76px; cursor: pointer; border-radius: 8px; touch-action: none; }
+.voice-field { min-width: 0; }
+.result { margin-top: 16px; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--raised); }
+.result-title { display: block; font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+.result audio { width: 100%; margin-top: 8px; height: 40px; }
+.wave { display: block; width: 100%; height: 84px; cursor: pointer; border-radius: 10px; touch-action: none; }
 
 /* ---------- history ---------- */
 .hist-list { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 8px; }
-.hist-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--raised); }
-.hist-item.playing { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: var(--sel); }
+.hist-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 14px; background: var(--raised); }
+.hist-item.playing { border-color: var(--sel-line); box-shadow: inset 0 0 0 1px var(--sel-line); background: var(--sel); }
 .hist-main { display: grid; min-width: 0; line-height: 1.5; }
 .hist-title { font-weight: 700; font-size: 14px; }
-.hist-meta { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.hist-meta { font: 12px var(--mono); color: var(--muted); }
 .hist-text { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hist-actions { display: flex; gap: 6px; flex: none; }
 
 /* ---------- footer ---------- */
-.foot { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; font-size: 13px; color: var(--muted); text-align: center; }
+.foot { max-width: 780px; margin: 0 auto; padding: 8px 16px 36px; font-size: 13px; color: var(--muted); text-align: center; }
 .foot p { margin: 4px 0; }
 .foot a { color: inherit; }
 
 /* ---------- dialogs ---------- */
-.dlg { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid var(--line); border-top: 6px solid var(--accent); border-radius: 16px; background: var(--panel); color: var(--text); }
-.dlg::backdrop { background: rgba(27, 18, 14, 0.6); }
-.dlg-body { padding: 18px 18px 16px; }
-.dlg h2 { margin: 0 0 8px; font-size: 19px; }
-.dlg h3 { margin: 16px 0 4px; font-size: 15px; }
+.dlg { position: fixed; width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); color: var(--text); box-shadow: 0 30px 80px -24px rgba(0, 0, 0, 0.55); }
+.dlg-wide { width: min(640px, calc(100vw - 24px)); }
+.dlg::before { content: ""; display: block; height: 3px; background: linear-gradient(90deg, var(--g1), var(--g2)); }
+.dlg::backdrop { background: rgba(6, 7, 10, 0.62); backdrop-filter: blur(3px); }
+.dlg-body { padding: 18px 20px 18px; }
+.dlg h2 { margin: 0 0 8px; font-size: 20px; font-weight: 800; }
+.dlg h3 { margin: 18px 0 4px; font-size: 15px; }
 .dlg p { margin: 6px 0; font-size: 14px; }
-.dlg-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-.key-current { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; margin: 10px 0; border-radius: 10px; background: var(--raised); font-size: 14px; }
+.dlg .eyebrow { margin-bottom: 8px; }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.key-current { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; margin: 10px 0; border-radius: 12px; background: var(--raised); font-size: 14px; }
 .radios { border: 0; padding: 0; margin: 4px 0 0; }
-.radios label { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: 14px; }
-.callout { margin: 14px 0; padding: 10px 12px; border: 1px solid var(--warn-line); background: var(--warn-bg); border-radius: 10px; font-size: 14px; }
+.radios label, .check { display: flex; align-items: flex-start; gap: 8px; margin: 6px 0; font-size: 14px; line-height: 1.5; }
+.radios input, .check input { margin-top: 2px; }
+.callout { margin: 14px 0; padding: 10px 12px; border: 1px solid var(--warn-line); background: var(--warn-bg); border-radius: 12px; font-size: 14px; }
 .callout p { margin: 4px 0 6px; }
-code { font-family: var(--mono); font-size: 0.92em; }
-code.block { display: block; padding: 6px 8px; border-radius: 6px; background: var(--panel); border: 1px solid var(--line); overflow-wrap: anywhere; }
+code { font-family: var(--mono); font-size: 0.9em; }
+code.block { display: block; padding: 6px 9px; border-radius: 8px; background: var(--field); border: 1px solid var(--line); overflow-wrap: anywhere; }
 .voices-box { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; }
 .price { width: 100%; border-collapse: collapse; font-size: 13px; margin: 6px 0; }
 .price th, .price td { border-bottom: 1px solid var(--line); padding: 6px 4px; text-align: left; }
-.price td:not(:first-child), .price th:not(:first-child) { text-align: right; white-space: nowrap; }
+.price td:not(:first-child), .price th:not(:first-child) { text-align: right; white-space: nowrap; font-family: var(--mono); }
+
+/* ---------- my voice ---------- */
+.mv-steps { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 12px; }
+.mv-step { padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--raised); }
+.mv-step h3 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 4px; }
+.step-dot { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font: 700 11px/1 var(--mono); color: #fff; background: linear-gradient(135deg, var(--g1), var(--g2)); }
+.script { margin: 10px 0; padding: 10px 14px; border-radius: 12px; background: var(--field); box-shadow: inset 3px 0 0 var(--g1); font-size: 15px; line-height: 1.9; }
+.script.consent { font-weight: 700; }
+.rec { margin-top: 10px; }
+.rec-meter { display: block; width: 100%; height: 48px; border-radius: 10px; background: var(--field); border: 1px solid var(--line); }
+.rec-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
+.rec-btn { gap: 8px; padding: 8px 16px; font-weight: 700; }
+.rec-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--rec); }
+.rec-btn.recording { border-color: var(--rec); color: var(--rec); }
+.rec-btn.recording .rec-dot { border-radius: 2px; animation: blink 1s steps(2, start) infinite; }
+@keyframes blink { to { visibility: hidden; } }
+.rec-time { font: 13px var(--mono); color: var(--muted); }
+.rec-audio { width: 100%; margin-top: 8px; height: 36px; }
+.file-btn { position: relative; display: inline-flex; align-items: center; padding: 7px 14px; border: 1px dashed var(--line2); border-radius: 999px; font-size: 13px; cursor: pointer; }
+.file-btn:hover { border-color: var(--text); }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.mv-list-title { margin-top: 20px !important; }
+.mv-list { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 8px; }
+.mv-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; }
+.mv-item .mv-name { font-weight: 700; font-size: 14px; }
+.mv-item .mv-meta { display: block; font: 12px var(--mono); color: var(--muted); }
+.mv-item .mv-actions { display: flex; gap: 6px; flex: none; }
 
 /* ---------- small screens ---------- */
 @media (max-width: 560px) {
   .brand .tag { display: none; }
+  .hero { padding-top: 28px; }
   .grid3 { grid-template-columns: 1fr; }
   .grid3 .field-label { margin-top: 8px; }
   .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   #btnConvert { margin-left: 0; flex: 1 1 100%; }
-  .hist-item { flex-direction: column; align-items: stretch; }
-  .hist-actions button { flex: 1; }
+  .hist-item, .mv-item { flex-direction: column; align-items: stretch; }
+  .hist-actions button, .mv-actions button { flex: 1; }
+  .step { padding: 16px; }
 }
 
 </style>
@@ -238,22 +289,27 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
 <body>
 <div id="app">
   <header class="bar">
-    <div class="brand">
-      <span class="mark" aria-hidden="true">訛</span>
+    <a class="brand" href="./" aria-label="NAMARI トップ">
+      <span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
       <span class="word">NAMARI</span>
-      <span class="tag">方言読み上げ</span>
-    </div>
+      <span class="tag">Dialect Voice Studio</span>
+    </a>
     <button id="btnSettings" type="button" class="ghost settings-btn" aria-haspopup="dialog">
       <span id="keyBadge" class="badge">キー未設定</span>設定
     </button>
   </header>
 
   <main class="main">
-    <p class="lead">標準語で書く → 方言を選ぶ → 声を作る。3ステップで、方言の音声ができます。</p>
+    <section class="hero" aria-labelledby="heroTitle">
+      <p class="eyebrow">DIALECT VOICE STUDIO</p>
+      <h1 id="heroTitle" class="hero-title">その言葉を、<span class="nowrap"><span class="grad">あの町の声</span>で。</span></h1>
+      <p class="lead">標準語で書いて、方言と声を選ぶだけ。20の方言と、あなた自身の声で読み上げます。</p>
+      <div id="heroWave" class="hero-wave" aria-hidden="true"></div>
+    </section>
 
     <!-- ================= step 1 ================= -->
     <section class="step" aria-labelledby="h1">
-      <h2 id="h1"><span class="num">1</span>テキストを入力<span class="sub">標準語で書いてください</span></h2>
+      <h2 id="h1"><span class="num">01</span><span class="kicker">TEXT</span>テキストを入力<span class="sub">標準語で書いてください</span></h2>
       <textarea id="srcText" rows="5" maxlength="1000" placeholder="例：今日はとても暑いですね。でも、夕方には涼しくなるそうですよ。" aria-label="標準語のテキスト"></textarea>
       <div class="row between">
         <div class="tags" role="group" aria-label="タグを挿入">
@@ -267,7 +323,7 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
 
     <!-- ================= step 2 ================= -->
     <section class="step" aria-labelledby="h2">
-      <h2 id="h2"><span class="num">2</span>方言を選ぶ</h2>
+      <h2 id="h2"><span class="num">02</span><span class="kicker">DIALECT</span>方言を選ぶ</h2>
       <div id="regionTabs" class="tabs" role="tablist" aria-label="地方"></div>
       <div id="dialectCards" class="cards" role="radiogroup" aria-label="方言"></div>
       <div class="row convert-row">
@@ -282,12 +338,16 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
 
     <!-- ================= step 3 ================= -->
     <section class="step" aria-labelledby="h3">
-      <h2 id="h3"><span class="num">3</span>声を選んで生成</h2>
+      <h2 id="h3"><span class="num">03</span><span class="kicker">VOICE</span>声を選んで生成</h2>
       <div class="grid3">
-        <label class="field-label">声<select id="voicePreset"></select></label>
+        <div class="voice-field">
+          <label class="field-label">声<select id="voicePreset"></select></label>
+          <button id="btnMyVoice" type="button" class="link-btn" aria-haspopup="dialog"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>自分の声を登録・管理</button>
+        </div>
         <label class="field-label">感情<select id="emotion"></select></label>
         <label class="field-label">モデル<select id="model"></select></label>
       </div>
+      <p id="voiceNote" class="hint" hidden>自分の声では、なまりは方言テキスト（言葉づかい）で表現されます。声の質やアクセントは、登録した声に近くなります。</p>
       <button id="btnGenerate" type="button" class="primary big">音声を生成</button>
       <p id="genNote" class="note" aria-live="polite"></p>
       <div id="result" class="result" hidden>
@@ -304,7 +364,7 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
 
     <!-- ================= history ================= -->
     <section class="step history" aria-labelledby="hH">
-      <h2 id="hH"><span class="num num-icon" aria-hidden="true">↺</span>履歴<span id="histCount" class="sub"></span>
+      <h2 id="hH"><span class="num num-icon" aria-hidden="true">↺</span><span class="kicker">HISTORY</span>履歴<span id="histCount" class="sub"></span>
         <button id="btnHistClear" type="button" class="ghost small push">すべて削除</button></h2>
       <p id="histNote" class="note" aria-live="polite"></p>
       <ol id="histList" class="hist-list"></ol>
@@ -314,7 +374,7 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
 
   <footer class="foot">
     <p>
-      <span>NAMARI v0.3.0</span> ·
+      <span>NAMARI v0.4.0</span> ·
       <span>MIT License © 2026 4n5-Studio</span> ·
       <button id="btnTerms" type="button" class="link" aria-haspopup="dialog">利用について</button> ·
       <a href="https://github.com/4n5AI/NAMARI" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -322,6 +382,67 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
     <p class="muted small">生成した音声には、Google の SynthID による電子透かしが入ります。入力したテキストとAPIキーは、Gemini API 以外には送信しません。</p>
   </footer>
 </div>
+
+<!-- ================= my voice (Voice replication) ================= -->
+<dialog id="dlgMyVoice" class="dlg dlg-wide" aria-labelledby="dlgMyVoiceTitle">
+  <div class="dlg-body">
+    <p class="eyebrow">MY VOICE</p>
+    <h2 id="dlgMyVoiceTitle">自分の声を登録</h2>
+    <p>あなたの声を録音すると、その声で方言を読み上げられます（Gemini API の Voice replication）。<strong>登録できるのは、あなた自身の声だけです。</strong></p>
+    <p id="mvUnsupported" class="note ng" hidden>このブラウザではマイク録音を使えません。最新の Chrome・Safari・Edge・Firefox で、https のページから開いてください。</p>
+
+    <ol class="mv-steps">
+      <li class="mv-step">
+        <h3><span class="step-dot">A</span>声のサンプル<span class="sub">10〜30秒</span></h3>
+        <p class="hint">静かな場所で、下の文章をふだんの話し方で読んでください（自分の声のファイルを使うこともできます）。</p>
+        <blockquote class="script">こんにちは。今日は、わたしの声を登録するために録音しています。天気のいい日は、少し遠回りをして散歩するのが好きです。駅前のパン屋さんで焼きたてのパンを買って、公園のベンチでゆっくり食べるのが、ちょっとした楽しみです。</blockquote>
+        <div id="recSource" class="rec" data-max="30" data-min="10">
+          <canvas class="rec-meter" aria-hidden="true"></canvas>
+          <div class="rec-row">
+            <button type="button" class="rec-btn"><span class="rec-dot" aria-hidden="true"></span><span class="rec-label">録音する</span></button>
+            <span class="rec-time">0:00 / 0:30</span>
+            <label class="file-btn">ファイルから<input type="file" accept="audio/*" class="rec-file"></label>
+          </div>
+          <audio class="rec-audio" controls hidden></audio>
+          <p class="note rec-note" aria-live="polite"></p>
+        </div>
+      </li>
+      <li class="mv-step">
+        <h3><span class="step-dot">B</span>同意の録音</h3>
+        <p class="hint">同じ人が、同じマイク・同じ場所で、次の文を一字一句そのまま読み上げてください。</p>
+        <blockquote id="consentText" class="script consent"></blockquote>
+        <div id="recConsent" class="rec" data-max="20" data-min="3">
+          <canvas class="rec-meter" aria-hidden="true"></canvas>
+          <div class="rec-row">
+            <button type="button" class="rec-btn"><span class="rec-dot" aria-hidden="true"></span><span class="rec-label">録音する</span></button>
+            <span class="rec-time">0:00 / 0:20</span>
+          </div>
+          <audio class="rec-audio" controls hidden></audio>
+          <p class="note rec-note" aria-live="polite"></p>
+        </div>
+      </li>
+      <li class="mv-step">
+        <h3><span class="step-dot">C</span>名前と保存方法</h3>
+        <label class="field-label" for="mvName">声の名前</label>
+        <input id="mvName" maxlength="40" placeholder="例：わたしの声" autocomplete="off">
+        <fieldset class="radios">
+          <legend class="field-label">保存方法</legend>
+          <label><input type="radio" name="mvStore" value="store" checked> Google に保存（1年間。どの端末でも同じキーで使えます）</label>
+          <label><input type="radio" name="mvStore" value="stateless"> Google に保存しない（7日間だけ使えるキーを、このブラウザに保存）</label>
+        </fieldset>
+        <label class="check"><input id="mvAgree" type="checkbox"> 録音したのは私自身の声で、本人として同意しています。他人の声は登録しません。</label>
+        <button id="btnMvCreate" type="button" class="primary wide" disabled>この声を登録</button>
+        <p id="mvNote" class="note" aria-live="polite"></p>
+      </li>
+    </ol>
+
+    <h3 class="mv-list-title">登録した声</h3>
+    <ul id="mvList" class="mv-list"></ul>
+    <p id="mvEmpty" class="hint">まだ登録した声はありません。</p>
+
+    <div class="dlg-actions"><button id="btnMvClose" type="button" class="ghost">閉じる</button></div>
+  </div>
+</dialog>
 
 <!-- ================= settings ================= -->
 <dialog id="dlgSettings" class="dlg" aria-labelledby="dlgSettingsTitle">
@@ -387,6 +508,8 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
       </tbody>
     </table>
     <p class="muted small">金額は100万トークンあたり（米ドル）。音声は1秒＝25トークンで、Flash TTS なら10秒で約 $0.0023 です。2027年1月から倍額の予定です。無料枠もあります。Voice design（声の作成）の料金は公式の料金表に記載がありません。最新の情報は <a href="https://ai.google.dev/gemini-api/docs/pricing" target="_blank" rel="noopener noreferrer">公式の料金ページ</a> を確認してください。</p>
+    <h3>自分の声（Voice replication）</h3>
+    <p>登録できるのは、あなた自身の声だけです。他人の声を、本人の同意なく複製しないでください。録音した音声は声の登録のために Gemini API にだけ送信し、このブラウザには保存しません（保存するのは声のIDまたはキーだけです）。「Google に保存しない」を選んだ場合のキー（voicekey_...）は、持っている人なら誰でもその声を使えるため、他人に共有しないでください。</p>
     <h3>方言について</h3>
     <p>方言への書き換えと発音は AI によるもので、実際の話し方と違う場合があります。「β」の方言は特に不安定です。変換後のテキストは手で直してから読み上げられます。</p>
     <div class="dlg-actions"><button id="btnTermsClose" type="button" class="primary">閉じる</button></div>
@@ -413,6 +536,12 @@ N.b64ToBytes = b64 => {
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
+};
+
+N.bytesToB64 = bytes => {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
 };
 
 /* ---- WAV ---- */
@@ -453,6 +582,17 @@ N.pcmToWav = (pcm, sampleRate = 24000, channels = 1) => {
   w(36, 'data'); dv.setUint32(40, pcm.length, true);
   out.set(pcm, 44);
   return out;
+};
+
+/* Float32 mono samples (-1..1) -> 16-bit WAV bytes */
+N.floatToWav = (samples, sampleRate) => {
+  const pcm = new Uint8Array(samples.length * 2);
+  const dv = new DataView(pcm.buffer);
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    dv.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+  return N.pcmToWav(pcm, sampleRate, 1);
 };
 
 /* API audio bytes -> {bytes (a well-formed WAV), info} */
@@ -537,6 +677,18 @@ N.voiceCache = {
   set(k, v) { const m = this.all(); m[k] = v; write('local', VOICES_NAME, JSON.stringify(m)); },
   del(k) { const m = this.all(); delete m[k]; write('local', VOICES_NAME, JSON.stringify(m)); },
   clear() { remove('local', VOICES_NAME); },
+};
+
+/* ---------------- the user's own voices (Voice replication) ----------------
+   [{id: voice_... | voicekey_..., name, created, stateless, model}]. A voicekey works for anyone
+   who holds it, so it lives next to the API key and nowhere else. */
+const MYVOICES_NAME = 'namari.myvoices.v1';
+N.myVoices = {
+  all() { const v = readJson(MYVOICES_NAME, []); return Array.isArray(v) ? v.filter(x => x && x.id) : []; },
+  get(id) { return this.all().find(v => v.id === id) || null; },
+  add(v) { const list = this.all().filter(x => x.id !== v.id); list.unshift(v); write('local', MYVOICES_NAME, JSON.stringify(list)); },
+  remove(id) { write('local', MYVOICES_NAME, JSON.stringify(this.all().filter(v => v.id !== id))); },
+  expires(v) { return v.created + (v.stateless ? 7 : 365) * 86400000; },
 };
 
 /* ---------------- preferences (never the text itself) ---------------- */
@@ -811,7 +963,32 @@ N.createVoice = async ({ key, model, prompt, displayName, gender, languageCode =
   return { id: String(v.id).replace(/^voices\//, ''), sample: s, raw: v };
 };
 
-const voicePath = id => '/voices/' + encodeURIComponent(String(id).replace(/^voices\//, ''));
+/* Voice replication: the user's own voice from a 10–30 s sample + a recorded consent statement.
+   store:true -> persistent voice_... (1 year); store:false -> voicekey_... (7 days, kept by the client) */
+N.CONSENT_JA = '私はこの音声の所有者であり、Googleがこの音声を使用して音声合成モデルを作成することを承認します。';
+N.replicateVoice = async ({ key, model, name, source, consent, store = true, signal }) => {
+  const voice = {
+    model, type: 'replicated',
+    replicated: {
+      source_audio: { mime_type: 'audio/wav', data: N.bytesToB64(source) },
+      consent_audio: { mime_type: 'audio/wav', data: N.bytesToB64(consent) },
+    },
+  };
+  if (name && store) voice.display_name = name;
+  let v;
+  try {
+    v = await call(key, 'POST', '/voices', { store, voice }, { signal });
+  } catch (err) {
+    if (err instanceof ApiError && err.kind === 'bad')
+      err.message = '声を登録できませんでした。同意文を一字一句そのまま読んだか、2つの録音が同じ人・同じマイク・静かな場所で録音されているかを確認して、録り直してください。';
+    throw err;
+  }
+  const id = v && (v.id || v.key);
+  if (!id) throw new ApiError('声の登録結果にIDが含まれていませんでした。', { kind: 'empty' });
+  return { id: String(id).replace(/^voices\//, ''), stateless: !v.id, raw: v };
+};
+
+const voicePath = id =>'/voices/' + encodeURIComponent(String(id).replace(/^voices\//, ''));
 N.getVoice = ({ key, id, signal }) => call(key, 'GET', voicePath(id), null, { signal });
 N.deleteVoice = ({ key, id, signal }) => call(key, 'DELETE', voicePath(id), null, { signal });
 
@@ -858,7 +1035,17 @@ N.resolveVoice = async ({ key, dialect, preset, model, signal, onStage }) => {
 
 /* resolve the voice, then TTS. A cached voice that has expired / been deleted is recreated
    once; a designed voice the model refuses falls back to the preset's prebuilt voice. */
-N.synthesize = async ({ key, dialect, preset, model, text, style, signal, onStage, onRetry }) => {
+N.synthesize = async ({ key, dialect, preset, model, text, style, fixedVoice, signal, onStage, onRetry }) => {
+  if (fixedVoice) {                                    // the user's own (replicated) voice: no design / fallback
+    if (onStage) onStage('speak');
+    try {
+      const res = await N.tts({ key, model, text, style, voice: fixedVoice, signal, onRetry });
+      return Object.assign(res, { voice: fixedVoice, designed: true, own: true, voiceCreated: false, voiceError: null });
+    } catch (err) {
+      if (err instanceof ApiError && err.kind === 'notfound') err.message = '自分の声が見つかりません。期限切れか削除済みの可能性があります。「自分の声」から登録し直してください。';
+      throw err;
+    }
+  }
   let v = await N.resolveVoice({ key, dialect, preset, model, signal, onStage });
   const speak = voice => { if (onStage) onStage('speak'); return N.tts({ key, model, text, style, voice, signal, onRetry }); };
   let res;
@@ -1185,7 +1372,9 @@ N.Waveform = class {
     for (let i = 0; i < peaks.length; i++) top = Math.max(top, Math.abs(peaks[i]));
     const gain = top > 0 ? Math.min(1 / top, 8) : 1;          // quiet takes still read as a shape
     const bars = Math.max(1, Math.floor((w + GAP) / (BAR + GAP)));
-    const played = col('--wave-played'), rest = col('--wave');
+    const played = g.createLinearGradient(0, 0, w, 0), rest = col('--wave');   // played part carries the voice signal gradient
+    played.addColorStop(0, col('--g1'));
+    played.addColorStop(1, col('--g2'));
     for (let i = 0; i < bars; i++) {
       const s = Math.floor((i * buckets) / bars), e = Math.max(s + 1, Math.floor(((i + 1) * buckets) / bars));
       let amp = 0;
@@ -1201,6 +1390,124 @@ N.Waveform = class {
       g.fillRect(Math.round(progress * w) - 1, 0, 2, h);
     }
   }
+};
+})();
+
+/*! NAMARI | MIT License | (c) 2026 4n5-Studio */
+/* ============================================================
+   NAMARI — recorder: microphone capture (MediaRecorder) with a live level,
+   and any browser-decodable audio -> 24 kHz mono 16-bit WAV
+   (the format the docs recommend for Voice replication)
+   ============================================================ */
+(() => {
+'use strict';
+
+const RATE = 24000;
+N.REC_RATE = RATE;
+N.micSupported = () => !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+
+/* decode -> mono 24 kHz -> trim leading / trailing silence -> WAV.
+   returns {bytes, duration, peak, truncated}; throws Error with a Japanese message */
+N.toVoiceWav = async (arrayBuffer, { maxSec = 0 } = {}) => {
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  let buf;
+  try { buf = await new OAC(1, 1, RATE).decodeAudioData(arrayBuffer.slice(0)); }   // decodes and resamples to 24 kHz
+  catch (e) { throw new Error('この音声は読み込めませんでした。WAV・MP3・M4A などの音声ファイルを使ってください。'); }
+  const n = buf.length, chs = buf.numberOfChannels;
+  let x = new Float32Array(n);
+  for (let c = 0; c < chs; c++) { const d = buf.getChannelData(c); for (let i = 0; i < n; i++) x[i] += d[i] / chs; }
+
+  let peak = 0;
+  for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(x[i]));
+  if (peak < 0.003) throw new Error('音が入っていないようです。マイクの設定（入力デバイス・音量）を確認してください。');
+
+  const win = Math.round(RATE * 0.02), thr = Math.max(0.006, peak * 0.04);
+  const loud = i => { let s = 0, m = 0; for (let j = Math.max(0, i); j < Math.min(i + win, n); j++, m++) s += x[j] * x[j]; return m && Math.sqrt(s / m) > thr; };
+  let a = 0, b = n;
+  while (a < n && !loud(a)) a += win;
+  while (b > a && !loud(b - win)) b -= win;
+  const pad = Math.round(RATE * 0.25);
+  x = x.subarray(Math.max(0, a - pad), Math.min(n, b + pad));
+
+  let truncated = false;
+  if (maxSec && x.length > maxSec * RATE) { x = x.subarray(0, maxSec * RATE); truncated = true; }
+  return { bytes: N.floatToWav(x, RATE), duration: x.length / RATE, peak, truncated };
+};
+
+/* microphone recorder: start() -> stop() resolves with the recorded Blob */
+N.Recorder = class {
+  constructor({ maxSec = 30, onLevel, onAutoStop } = {}) {
+    this.maxSec = maxSec;
+    this.onLevel = onLevel;
+    this.onAutoStop = onAutoStop;
+    this.mr = null;
+  }
+  get recording() { return !!this.mr && this.mr.state === 'recording'; }
+  async start() {
+    this.stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: false, noiseSuppression: true, autoGainControl: true } });
+    const type = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm']
+      .find(t => window.MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
+    this.mr = new MediaRecorder(this.stream, type ? { mimeType: type } : undefined);
+    const chunks = [];
+    this.mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    this.done = new Promise(resolve => { this.mr.onstop = () => resolve(new Blob(chunks, { type: this.mr.mimeType || type || 'audio/webm' })); });
+
+    const AC = window.AudioContext || window.webkitAudioContext;
+    this.ac = new AC();
+    const an = this.ac.createAnalyser();
+    an.fftSize = 1024;
+    this.ac.createMediaStreamSource(this.stream).connect(an);
+    const data = new Float32Array(an.fftSize);
+
+    this.t0 = performance.now();
+    this.mr.start(250);
+    this.timer = setTimeout(() => { if (this.recording) this.stop().then(blob => { if (this.onAutoStop) this.onAutoStop(blob); }); }, this.maxSec * 1000);
+    const tick = () => {
+      if (!this.recording) return;
+      an.getFloatTimeDomainData(data);
+      let s = 0;
+      for (let i = 0; i < data.length; i++) s += data[i] * data[i];
+      if (this.onLevel) this.onLevel(Math.sqrt(s / data.length), (performance.now() - this.t0) / 1000);
+      this.raf = requestAnimationFrame(tick);
+    };
+    this.raf = requestAnimationFrame(tick);
+  }
+  async stop() {
+    if (!this.mr) return null;
+    clearTimeout(this.timer);
+    cancelAnimationFrame(this.raf);
+    if (this.mr.state !== 'inactive') this.mr.stop();
+    for (const t of this.stream.getTracks()) t.stop();
+    try { this.ac.close(); } catch (e) { /* already closed */ }
+    const blob = await this.done;
+    this.mr = null;
+    return blob;
+  }
+};
+
+/* rolling level bars for the recorder (newest on the right) */
+N.drawLevels = (canvas, levels) => {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (!w || !h) return;
+  const dpr = window.devicePixelRatio || 1;
+  if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+  const g = canvas.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+  const css = getComputedStyle(canvas);
+  const grad = g.createLinearGradient(0, 0, w, 0);
+  grad.addColorStop(0, css.getPropertyValue('--g1').trim() || '#7c3aed');
+  grad.addColorStop(1, css.getPropertyValue('--g2').trim() || '#06b6d4');
+  const bar = 3, gap = 2, count = Math.floor((w + gap) / (bar + gap));
+  const recent = levels.slice(-count);
+  g.fillStyle = css.getPropertyValue('--wave').trim() || '#888';
+  g.fillRect(0, h / 2 - 0.5, w, 1);
+  g.fillStyle = grad;
+  recent.forEach((lv, i) => {
+    const bh = Math.max(2, Math.min(1, lv * 5) * (h - 4));
+    const x = w - (recent.length - i) * (bar + gap);
+    g.fillRect(x, (h - bh) / 2, bar, bh);
+  });
 };
 })();
 
@@ -1266,8 +1573,10 @@ function showError(id, err) {
 }
 const onRetry = id => r => note(id, `混み合っています。${Math.ceil(r.wait / 1000)}秒待って再試行します（${r.attempt}/${r.max}回目）…`);
 
+const setLive = on => document.body.classList.toggle('live', on);   // wave / logo animate while a voice is being made
 function setBusy(on, label) {
   S.busy = on;
+  setLive(on);
   for (const id of ['btnConvert', 'btnGenerate']) $(id).disabled = on;
   $('btnGenerate').textContent = on && label ? label : '音声を生成';
 }
@@ -1389,7 +1698,24 @@ function fillSelect(sel, items, value) {
   for (const it of items) sel.add(new Option(it.label, it.id));
   sel.value = items.some(it => it.id === value) ? value : items[0].id;
 }
-fillSelect($('voicePreset'), [{ id: 'auto', label: '自動' }, ...N.VOICE_PRESETS], prefs.voicePreset);
+/* voice: auto / 4 designed presets / the user's own voices ("my:<id>") */
+const OWN = 'my:';
+function renderVoiceSelect(value) {
+  const sel = $('voicePreset');
+  sel.textContent = '';
+  sel.add(new Option('自動', 'auto'));
+  for (const p of N.VOICE_PRESETS) sel.add(new Option(p.label, p.id));
+  const mine = N.myVoices.all();
+  if (mine.length) {
+    const group = el('optgroup', { label: '自分の声' });
+    for (const v of mine) group.append(new Option(v.name, OWN + v.id));
+    sel.append(group);
+  }
+  sel.value = [...sel.options].some(o => o.value === value) ? value : 'auto';
+  $('voiceNote').hidden = !sel.value.startsWith(OWN);
+  updateAutoVoiceLabel();
+}
+const ownVoice = () => { const v = $('voicePreset').value; return v.startsWith(OWN) ? N.myVoices.get(v.slice(OWN.length)) : null; };
 fillSelect($('emotion'), N.EMOTIONS, prefs.emotion);
 fillSelect($('model'), N.TTS_MODELS, prefs.model);
 function updateAutoVoiceLabel() {
@@ -1401,7 +1727,10 @@ function updatePriceNote() {
   const per10 = (10 * N.AUDIO_TOKENS_PER_SEC * p.output) / 1e6;
   $('priceNote').textContent = `料金の目安：音声10秒で約 $${per10.toFixed(4)}（${N.TTS_MODELS.find(x => x.id === m).label}）＋ 変換1回 $0.001 未満。2026年12月末までの有料枠の価格で、2027年1月から倍額の予定です。無料枠もあります。`;
 }
-$('voicePreset').addEventListener('change', () => N.prefs.set({ voicePreset: $('voicePreset').value }));
+$('voicePreset').addEventListener('change', () => {
+  N.prefs.set({ voicePreset: $('voicePreset').value });
+  $('voiceNote').hidden = !$('voicePreset').value.startsWith(OWN);
+});
 $('emotion').addEventListener('change', () => N.prefs.set({ emotion: $('emotion').value }));
 $('model').addEventListener('change', () => { N.prefs.set({ model: $('model').value }); updatePriceNote(); });
 
@@ -1433,20 +1762,21 @@ async function generate() {
   if (!text || isStale()) {
     note('genNote', '先に方言に変換します…');
     try { conv = await convert(); } catch (err) { showError('convertNote', err); note('genNote', '変換に失敗したため、生成を中止しました。', 'ng'); return; }
-    if (!conv) { note('genNote', ''); return; }
+    if (!conv) { note('genNote', $('convertNote').textContent || '方言テキストを用意できませんでした。', 'ng'); return; }   // e.g. step 01 is empty
     text = conv.text;
   }
-  const preset = N.voicePreset($('voicePreset').value, d);
+  const own = ownVoice();
+  const preset = N.voicePreset(own ? 'auto' : $('voicePreset').value, d);
   const model = $('model').value;
   const emo = N.EMOTIONS.find(e => e.id === $('emotion').value) || N.EMOTIONS[0];
   const r = await N.synthesize({
-    key, dialect: d, preset, model, text, style: emo.style,
+    key, dialect: d, preset, model, text, style: emo.style, fixedVoice: own ? own.id : null,
     onRetry: onRetry('genNote'), onStage: st => note('genNote', STAGE[st](d, preset)),
   });
   const dur = (r.info && r.info.duration) || 0;
   const item = {
     created: Date.now(), dialectId: d.id, dialectName: d.name,
-    voiceLabel: r.designed ? preset.label : `既定の声 ${r.voice}`, emotionLabel: emo.id === 'none' ? '' : emo.label,
+    voiceLabel: own ? `自分の声（${own.name}）` : r.designed ? preset.label : `既定の声 ${r.voice}`, emotionLabel: emo.id === 'none' ? '' : emo.label,
     model, text, duration: dur, bytes: r.bytes,
     cost: usd(model, r.usage, Math.round(dur * N.AUDIO_TOKENS_PER_SEC)) + (conv ? usd(N.TEXT_MODEL, conv.usage) : 0),
   };
@@ -1634,18 +1964,200 @@ $('btnVoicesDelete').addEventListener('click', async () => {
   renderKeyState();
 });
 
+/* ---------------- my voice (Voice replication) ---------------- */
+$('consentText').textContent = N.CONSENT_JA;
+const fmtClock = sec => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+const fmtDate = ts => { const d = new Date(ts); return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`; };
+
+/* one recorder block (.rec): record with a live level, or pick a file; ends as a 24 kHz mono WAV */
+function recorderWidget(root, onChange) {
+  const maxSec = +root.dataset.max, minSec = +root.dataset.min;
+  const q = c => root.querySelector(c);
+  const btn = q('.rec-btn'), label = q('.rec-label'), time = q('.rec-time'), meter = q('.rec-meter'), audio = q('.rec-audio'), noteEl = q('.rec-note'), file = q('.rec-file');
+  const w = { wav: null, rec: null, url: null };
+  let levels = [];
+  const say = (msg, kind = '') => { noteEl.textContent = msg; noteEl.className = 'note rec-note' + (kind ? ' ' + kind : ''); };
+  const setTime = sec => { time.textContent = `${fmtClock(sec)} / ${fmtClock(maxSec)}`; };
+  const idle = () => { btn.classList.remove('recording'); label.textContent = w.wav ? '録り直す' : '録音する'; setLive(false); };
+  async function accept(buffer) {
+    say('音声を整えています…');
+    try {
+      const r = await N.toVoiceWav(buffer, { maxSec });
+      if (r.duration < minSec) {
+        w.wav = null;
+        say(`${minSec}秒以上必要です（今: ${r.duration.toFixed(1)}秒）。もう一度録音してください。`, 'ng');
+      } else {
+        w.wav = r;
+        if (w.url) URL.revokeObjectURL(w.url);
+        w.url = URL.createObjectURL(new Blob([r.bytes], { type: 'audio/wav' }));
+        audio.src = w.url;
+        audio.hidden = false;
+        const quiet = r.peak < 0.08 ? '音が小さめです。マイクに少し近づくと、より似た声になります。' : '';
+        say(`OK：${r.duration.toFixed(1)}秒${r.truncated ? `（${maxSec}秒までにしました）` : ''}。再生して確認してください。${quiet}`, quiet ? 'warn' : 'ok');
+      }
+    } catch (err) {
+      w.wav = null;
+      say(err && err.message ? err.message : '音声を読み込めませんでした。', 'ng');
+    }
+    idle();
+    onChange();
+  }
+  btn.addEventListener('click', async () => {
+    if (w.rec) {                                                  // stop
+      const rec = w.rec;
+      w.rec = null;
+      const blob = await rec.stop();
+      if (blob) accept(await blob.arrayBuffer());
+      return;
+    }
+    if (!N.micSupported()) { say('このブラウザではマイク録音を使えません。', 'ng'); return; }
+    levels = [];
+    const rec = new N.Recorder({
+      maxSec,
+      onLevel: (lv, sec) => { levels.push(lv); N.drawLevels(meter, levels); setTime(sec); },
+      onAutoStop: async blob => { if (w.rec !== rec) return; w.rec = null; accept(await blob.arrayBuffer()); },
+    });
+    try {
+      await rec.start();
+    } catch (err) {
+      say(err && err.name === 'NotAllowedError'
+        ? 'マイクの使用が許可されませんでした。アドレスバーの設定から、このサイトにマイクを許可してください。'
+        : `マイクを使えませんでした（${(err && (err.message || err.name)) || '不明なエラー'}）。`, 'ng');
+      return;
+    }
+    w.rec = rec;
+    btn.classList.add('recording');
+    label.textContent = '停止';
+    setLive(true);
+    say(`録音中… 読み終わったら「停止」を押してください（${maxSec}秒で自動停止）。`);
+  });
+  if (file) file.addEventListener('change', async () => {
+    const f = file.files && file.files[0];
+    file.value = '';
+    if (!f) return;
+    if (f.size > 20 * 1024 * 1024) { say('ファイルが大きすぎます（20MBまで）。', 'ng'); return; }
+    accept(await f.arrayBuffer());
+  });
+  w.stop = async () => { if (w.rec) { const rec = w.rec; w.rec = null; await rec.stop(); idle(); } };
+  w.reset = () => {
+    w.stop();
+    w.wav = null;
+    audio.hidden = true;
+    audio.removeAttribute('src');
+    levels = [];
+    N.drawLevels(meter, levels);
+    setTime(0);
+    say('');
+    idle();
+  };
+  return w;
+}
+const recSrc = recorderWidget($('recSource'), updateCreate);
+const recCon = recorderWidget($('recConsent'), updateCreate);
+function updateCreate() { $('btnMvCreate').disabled = !(recSrc.wav && recCon.wav && $('mvAgree').checked) || S.busy; }
+$('mvAgree').addEventListener('change', updateCreate);
+
+function renderMyVoices() {
+  const list = $('mvList');
+  list.textContent = '';
+  const mine = N.myVoices.all();
+  for (const v of mine) {
+    const exp = N.myVoices.expires(v);
+    const meta = `${v.stateless ? '7日間キー（このブラウザ）' : 'Google に保存'} · 期限 ${fmtDate(exp)}${Date.now() > exp ? '（期限切れ）' : ''}`;
+    const acts = el('div', { class: 'mv-actions' });
+    const use = el('button', { type: 'button', class: 'small' }, '使う');
+    use.addEventListener('click', () => {
+      renderVoiceSelect(OWN + v.id);
+      N.prefs.set({ voicePreset: OWN + v.id });
+      $('dlgMyVoice').close();
+    });
+    const del = el('button', { type: 'button', class: 'small danger' }, '削除');
+    del.addEventListener('click', async () => {
+      if (!confirm(`「${v.name}」を削除します。${v.stateless ? '' : 'Google 側からも削除します。'}よろしいですか？`)) return;
+      if (!v.stateless) {
+        const key = requireKey('mvNote');
+        if (!key) return;
+        try { await N.deleteVoice({ key, id: v.id }); }
+        catch (err) { if (!(err instanceof N.ApiError && err.kind === 'notfound')) { showError('mvNote', err); return; } }
+      }
+      N.myVoices.remove(v.id);
+      renderVoiceSelect($('voicePreset').value);
+      renderMyVoices();
+      note('mvNote', `「${v.name}」を削除しました。`, 'ok');
+    });
+    acts.append(use, del);
+    list.append(el('li', { class: 'mv-item' }, el('div', {}, el('span', { class: 'mv-name' }, v.name), el('span', { class: 'mv-meta' }, meta)), acts));
+  }
+  $('mvEmpty').hidden = mine.length > 0;
+}
+$('btnMyVoice').addEventListener('click', () => {
+  $('mvUnsupported').hidden = N.micSupported();
+  note('mvNote', '');
+  renderMyVoices();
+  updateCreate();
+  $('dlgMyVoice').showModal();
+});
+$('btnMvClose').addEventListener('click', () => $('dlgMyVoice').close());
+$('dlgMyVoice').addEventListener('close', () => { recSrc.stop(); recCon.stop(); });
+$('btnMvCreate').addEventListener('click', async () => {
+  const key = requireKey('mvNote');
+  if (!key) return;
+  const name = $('mvName').value.trim() || 'わたしの声';
+  const store = ((document.querySelector('input[name=mvStore]:checked') || {}).value || 'store') !== 'stateless';
+  const model = $('model').value;
+  S.busy = true;
+  updateCreate();
+  setLive(true);
+  note('mvNote', '声を登録中…（数十秒かかることがあります）');
+  try {
+    const r = await N.replicateVoice({ key, model, name, source: recSrc.wav.bytes, consent: recCon.wav.bytes, store });
+    N.myVoices.add({ id: r.id, name, created: Date.now(), stateless: r.stateless, model });
+    renderVoiceSelect(OWN + r.id);
+    N.prefs.set({ voicePreset: OWN + r.id });
+    renderMyVoices();
+    recSrc.reset();
+    recCon.reset();
+    $('mvAgree').checked = false;
+    $('mvName').value = '';
+    note('mvNote', `「${name}」を登録しました。ステップ03の「声」で選ばれています。`, 'ok');
+  } catch (err) {
+    showError('mvNote', err);
+  } finally {
+    S.busy = false;
+    setLive(false);
+    updateCreate();
+  }
+});
+
+/* ---------------- hero: a row of voice bars ---------------- */
+(() => {
+  const box = $('heroWave'), n = 72;
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1), env = Math.pow(Math.sin(Math.PI * t), 0.7);
+    const h = 0.14 + 0.86 * env * (0.45 + 0.55 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.43)));
+    const bar = el('span');
+    bar.style.height = `${Math.round(h * 100)}%`;
+    bar.style.animationDelay = `${-((i * 0.37) % 2.8).toFixed(2)}s`;
+    box.append(bar);
+  }
+})();
+
 /* ---------------- terms dialog ---------------- */
 $('btnTerms').addEventListener('click', () => $('dlgTerms').showModal());
 $('btnTermsClose').addEventListener('click', () => $('dlgTerms').close());
 for (const dlg of document.querySelectorAll('dialog')) {
-  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });   // click on the backdrop
+  dlg.addEventListener('click', e => {                                          // click on the backdrop (outside the box)
+    if (e.target !== dlg) return;
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
 }
 
 /* ---------------- start ---------------- */
 renderRegions();
 renderCards();
 renderStrength();
-updateAutoVoiceLabel();
+renderVoiceSelect(prefs.voicePreset);
 updatePriceNote();
 updateCount();
 updateBadge();

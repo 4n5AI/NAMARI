@@ -38,9 +38,14 @@
 
 ### そのほかの機能
 
+- **自分の声（マイボイス）:** 自分の声を録音して登録すると、その声で方言を読み上げられます（Gemini API の [Voice replication](https://ai.google.dev/gemini-api/docs/voice-replication)）
+  - 声のサンプル（10〜30秒）と、同意文の読み上げを録音します。サンプルは音声ファイルからも読み込めます
+  - 録音は 24kHz・モノラル・16bit の WAV に変換し、前後の無音を削ってから送信します
+  - 保存方法は2つから選べます：「Google に保存（`voice_...`・1年間）」または「Google に保存しない（`voicekey_...`・7日間、キーはこのブラウザに保存）」
+  - 登録できるのは本人の声だけです（同意文の録音と、本人確認のチェックが必要です）
 - **波形表示:** 生成した音声の波形を Canvas で表示します。クリックや左右キーで再生位置を移動できます
 - **履歴:** 生成した音声を、このブラウザ（IndexedDB）に最新20件まで保存します。再生・再ダウンロード・削除ができます
-- **デザイン:** チョコミント配色です。ライトモードはミント地にチョコ、ダークモードはチョコ地にミントになります
+- **デザイン:** 声の信号をイメージした、紫から水色へのグラデーションを使っています。ライト／ダークモードに対応しています
 
 ## 使い方
 
@@ -83,12 +88,13 @@ index.html              ← build.py の出力（GitHub Pages で公開するフ
 build.py                ← src/*.js と app/ を結合し、CSP のハッシュを埋め込む
 VERSION
 app/body.html           ← 画面の HTML
-app/style.css           ← スタイル（チョコミント配色・ライト／ダーク）
+app/style.css           ← スタイル（ライト／ダーク）
 src/01_util.js          ← 共通処理、base64・WAV処理、タグの照合
 src/02_storage.js       ← APIキー、作成した声の記録、設定、履歴（IndexedDB）
-src/03_api.js           ← Gemini API クライアント（変換・TTS・voices）、声の用意
+src/03_api.js           ← Gemini API クライアント（変換・TTS・Voice design・Voice replication）
 src/04_dialects.js      ← 方言データ、声・感情のプリセット
 src/05_waveform.js      ← 波形表示（Canvas 2D）
+src/06_recorder.js      ← マイク録音、24kHz モノラル WAV への変換
 src/10_ui.js            ← 画面の動作
 dev/test.html           ← API疎通テスト
 ```
@@ -97,7 +103,8 @@ dev/test.html           ← API疎通テスト
 
 - [x] フェーズ1：API疎通の確認（`dev/test.html`）
 - [x] フェーズ2：MVP（3ステップUI・5方言・Voice design・WAVダウンロード）＋初回デプロイ
-- [x] フェーズ3：全方言、履歴（IndexedDB）、波形表示、チョコミント配色
+- [x] フェーズ3：全方言、履歴（IndexedDB）、波形表示
+- [x] 追加：自分の声（Voice replication）、デザイン刷新
 - [ ] フェーズ4（任意）：字幕付き縦型MP4の書き出し
 
 ## License
