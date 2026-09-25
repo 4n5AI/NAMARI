@@ -19,6 +19,12 @@ N.b64ToBytes = b64 => {
   return out;
 };
 
+N.bytesToB64 = bytes => {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+};
+
 /* ---- WAV ---- */
 const ascii = (b, o, n) => String.fromCharCode(...b.subarray(o, o + n));
 
@@ -57,6 +63,17 @@ N.pcmToWav = (pcm, sampleRate = 24000, channels = 1) => {
   w(36, 'data'); dv.setUint32(40, pcm.length, true);
   out.set(pcm, 44);
   return out;
+};
+
+/* Float32 mono samples (-1..1) -> 16-bit WAV bytes */
+N.floatToWav = (samples, sampleRate) => {
+  const pcm = new Uint8Array(samples.length * 2);
+  const dv = new DataView(pcm.buffer);
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    dv.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+  return N.pcmToWav(pcm, sampleRate, 1);
 };
 
 /* API audio bytes -> {bytes (a well-formed WAV), info} */

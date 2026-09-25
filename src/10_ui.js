@@ -60,8 +60,10 @@ function showError(id, err) {
 }
 const onRetry = id => r => note(id, `混み合っています。${Math.ceil(r.wait / 1000)}秒待って再試行します（${r.attempt}/${r.max}回目）…`);
 
+const setLive = on => document.body.classList.toggle('live', on);   // wave / logo animate while a voice is being made
 function setBusy(on, label) {
   S.busy = on;
+  setLive(on);
   for (const id of ['btnConvert', 'btnGenerate']) $(id).disabled = on;
   $('btnGenerate').textContent = on && label ? label : '音声を生成';
 }
@@ -183,7 +185,24 @@ function fillSelect(sel, items, value) {
   for (const it of items) sel.add(new Option(it.label, it.id));
   sel.value = items.some(it => it.id === value) ? value : items[0].id;
 }
-fillSelect($('voicePreset'), [{ id: 'auto', label: '自動' }, ...N.VOICE_PRESETS], prefs.voicePreset);
+/* voice: auto / 4 designed presets / the user's own voices ("my:<id>") */
+const OWN = 'my:';
+function renderVoiceSelect(value) {
+  const sel = $('voicePreset');
+  sel.textContent = '';
+  sel.add(new Option('自動', 'auto'));
+  for (const p of N.VOICE_PRESETS) sel.add(new Option(p.label, p.id));
+  const mine = N.myVoices.all();
+  if (mine.length) {
+    const group = el('optgroup', { label: '自分の声' });
+    for (const v of mine) group.append(new Option(v.name, OWN + v.id));
+    sel.append(group);
+  }
+  sel.value = [...sel.options].some(o => o.value === value) ? value : 'auto';
+  $('voiceNote').hidden = !sel.value.startsWith(OWN);
+  updateAutoVoiceLabel();
+}
+const ownVoice = () => { const v = $('voicePreset').value; return v.startsWith(OWN) ? N.myVoices.get(v.slice(OWN.length)) : null; };
 fillSelect($('emotion'), N.EMOTIONS, prefs.emotion);
 fillSelect($('model'), N.TTS_MODELS, prefs.model);
 function updateAutoVoiceLabel() {
@@ -195,7 +214,10 @@ function updatePriceNote() {
   const per10 = (10 * N.AUDIO_TOKENS_PER_SEC * p.output) / 1e6;
   $('priceNote').textContent = `料金の目安：音声10秒で約 $${per10.toFixed(4)}（${N.TTS_MODELS.find(x => x.id === m).label}）＋ 変換1回 $0.001 未満。2026年12月末までの有料枠の価格で、2027年1月から倍額の予定です。無料枠もあります。`;
 }
-$('voicePreset').addEventListener('change', () => N.prefs.set({ voicePreset: $('voicePreset').value }));
+$('voicePreset').addEventListener('change', () => {
+  N.prefs.set({ voicePreset: $('voicePreset').value });
+  $('voiceNote').hidden = !$('voicePreset').value.startsWith(OWN);
+});
 $('emotion').addEventListener('change', () => N.prefs.set({ emotion: $('emotion').value }));
 $('model').addEventListener('change', () => { N.prefs.set({ model: $('model').value }); updatePriceNote(); });
 
@@ -227,20 +249,21 @@ async function generate() {
   if (!text || isStale()) {
     note('genNote', '先に方言に変換します…');
     try { conv = await convert(); } catch (err) { showError('convertNote', err); note('genNote', '変換に失敗したため、生成を中止しました。', 'ng'); return; }
-    if (!conv) { note('genNote', ''); return; }
+    if (!conv) { note('genNote', $('convertNote').textContent || '方言テキストを用意できませんでした。', 'ng'); return; }   // e.g. step 01 is empty
     text = conv.text;
   }
-  const preset = N.voicePreset($('voicePreset').value, d);
+  const own = ownVoice();
+  const preset = N.voicePreset(own ? 'auto' : $('voicePreset').value, d);
   const model = $('model').value;
   const emo = N.EMOTIONS.find(e => e.id === $('emotion').value) || N.EMOTIONS[0];
   const r = await N.synthesize({
-    key, dialect: d, preset, model, text, style: emo.style,
+    key, dialect: d, preset, model, text, style: emo.style, fixedVoice: own ? own.id : null,
     onRetry: onRetry('genNote'), onStage: st => note('genNote', STAGE[st](d, preset)),
   });
   const dur = (r.info && r.info.duration) || 0;
   const item = {
     created: Date.now(), dialectId: d.id, dialectName: d.name,
-    voiceLabel: r.designed ? preset.label : `既定の声 ${r.voice}`, emotionLabel: emo.id === 'none' ? '' : emo.label,
+    voiceLabel: own ? `自分の声（${own.name}）` : r.designed ? preset.label : `既定の声 ${r.voice}`, emotionLabel: emo.id === 'none' ? '' : emo.label,
     model, text, duration: dur, bytes: r.bytes,
     cost: usd(model, r.usage, Math.round(dur * N.AUDIO_TOKENS_PER_SEC)) + (conv ? usd(N.TEXT_MODEL, conv.usage) : 0),
   };
@@ -428,18 +451,200 @@ $('btnVoicesDelete').addEventListener('click', async () => {
   renderKeyState();
 });
 
+/* ---------------- my voice (Voice replication) ---------------- */
+$('consentText').textContent = N.CONSENT_JA;
+const fmtClock = sec => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+const fmtDate = ts => { const d = new Date(ts); return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`; };
+
+/* one recorder block (.rec): record with a live level, or pick a file; ends as a 24 kHz mono WAV */
+function recorderWidget(root, onChange) {
+  const maxSec = +root.dataset.max, minSec = +root.dataset.min;
+  const q = c => root.querySelector(c);
+  const btn = q('.rec-btn'), label = q('.rec-label'), time = q('.rec-time'), meter = q('.rec-meter'), audio = q('.rec-audio'), noteEl = q('.rec-note'), file = q('.rec-file');
+  const w = { wav: null, rec: null, url: null };
+  let levels = [];
+  const say = (msg, kind = '') => { noteEl.textContent = msg; noteEl.className = 'note rec-note' + (kind ? ' ' + kind : ''); };
+  const setTime = sec => { time.textContent = `${fmtClock(sec)} / ${fmtClock(maxSec)}`; };
+  const idle = () => { btn.classList.remove('recording'); label.textContent = w.wav ? '録り直す' : '録音する'; setLive(false); };
+  async function accept(buffer) {
+    say('音声を整えています…');
+    try {
+      const r = await N.toVoiceWav(buffer, { maxSec });
+      if (r.duration < minSec) {
+        w.wav = null;
+        say(`${minSec}秒以上必要です（今: ${r.duration.toFixed(1)}秒）。もう一度録音してください。`, 'ng');
+      } else {
+        w.wav = r;
+        if (w.url) URL.revokeObjectURL(w.url);
+        w.url = URL.createObjectURL(new Blob([r.bytes], { type: 'audio/wav' }));
+        audio.src = w.url;
+        audio.hidden = false;
+        const quiet = r.peak < 0.08 ? '音が小さめです。マイクに少し近づくと、より似た声になります。' : '';
+        say(`OK：${r.duration.toFixed(1)}秒${r.truncated ? `（${maxSec}秒までにしました）` : ''}。再生して確認してください。${quiet}`, quiet ? 'warn' : 'ok');
+      }
+    } catch (err) {
+      w.wav = null;
+      say(err && err.message ? err.message : '音声を読み込めませんでした。', 'ng');
+    }
+    idle();
+    onChange();
+  }
+  btn.addEventListener('click', async () => {
+    if (w.rec) {                                                  // stop
+      const rec = w.rec;
+      w.rec = null;
+      const blob = await rec.stop();
+      if (blob) accept(await blob.arrayBuffer());
+      return;
+    }
+    if (!N.micSupported()) { say('このブラウザではマイク録音を使えません。', 'ng'); return; }
+    levels = [];
+    const rec = new N.Recorder({
+      maxSec,
+      onLevel: (lv, sec) => { levels.push(lv); N.drawLevels(meter, levels); setTime(sec); },
+      onAutoStop: async blob => { if (w.rec !== rec) return; w.rec = null; accept(await blob.arrayBuffer()); },
+    });
+    try {
+      await rec.start();
+    } catch (err) {
+      say(err && err.name === 'NotAllowedError'
+        ? 'マイクの使用が許可されませんでした。アドレスバーの設定から、このサイトにマイクを許可してください。'
+        : `マイクを使えませんでした（${(err && (err.message || err.name)) || '不明なエラー'}）。`, 'ng');
+      return;
+    }
+    w.rec = rec;
+    btn.classList.add('recording');
+    label.textContent = '停止';
+    setLive(true);
+    say(`録音中… 読み終わったら「停止」を押してください（${maxSec}秒で自動停止）。`);
+  });
+  if (file) file.addEventListener('change', async () => {
+    const f = file.files && file.files[0];
+    file.value = '';
+    if (!f) return;
+    if (f.size > 20 * 1024 * 1024) { say('ファイルが大きすぎます（20MBまで）。', 'ng'); return; }
+    accept(await f.arrayBuffer());
+  });
+  w.stop = async () => { if (w.rec) { const rec = w.rec; w.rec = null; await rec.stop(); idle(); } };
+  w.reset = () => {
+    w.stop();
+    w.wav = null;
+    audio.hidden = true;
+    audio.removeAttribute('src');
+    levels = [];
+    N.drawLevels(meter, levels);
+    setTime(0);
+    say('');
+    idle();
+  };
+  return w;
+}
+const recSrc = recorderWidget($('recSource'), updateCreate);
+const recCon = recorderWidget($('recConsent'), updateCreate);
+function updateCreate() { $('btnMvCreate').disabled = !(recSrc.wav && recCon.wav && $('mvAgree').checked) || S.busy; }
+$('mvAgree').addEventListener('change', updateCreate);
+
+function renderMyVoices() {
+  const list = $('mvList');
+  list.textContent = '';
+  const mine = N.myVoices.all();
+  for (const v of mine) {
+    const exp = N.myVoices.expires(v);
+    const meta = `${v.stateless ? '7日間キー（このブラウザ）' : 'Google に保存'} · 期限 ${fmtDate(exp)}${Date.now() > exp ? '（期限切れ）' : ''}`;
+    const acts = el('div', { class: 'mv-actions' });
+    const use = el('button', { type: 'button', class: 'small' }, '使う');
+    use.addEventListener('click', () => {
+      renderVoiceSelect(OWN + v.id);
+      N.prefs.set({ voicePreset: OWN + v.id });
+      $('dlgMyVoice').close();
+    });
+    const del = el('button', { type: 'button', class: 'small danger' }, '削除');
+    del.addEventListener('click', async () => {
+      if (!confirm(`「${v.name}」を削除します。${v.stateless ? '' : 'Google 側からも削除します。'}よろしいですか？`)) return;
+      if (!v.stateless) {
+        const key = requireKey('mvNote');
+        if (!key) return;
+        try { await N.deleteVoice({ key, id: v.id }); }
+        catch (err) { if (!(err instanceof N.ApiError && err.kind === 'notfound')) { showError('mvNote', err); return; } }
+      }
+      N.myVoices.remove(v.id);
+      renderVoiceSelect($('voicePreset').value);
+      renderMyVoices();
+      note('mvNote', `「${v.name}」を削除しました。`, 'ok');
+    });
+    acts.append(use, del);
+    list.append(el('li', { class: 'mv-item' }, el('div', {}, el('span', { class: 'mv-name' }, v.name), el('span', { class: 'mv-meta' }, meta)), acts));
+  }
+  $('mvEmpty').hidden = mine.length > 0;
+}
+$('btnMyVoice').addEventListener('click', () => {
+  $('mvUnsupported').hidden = N.micSupported();
+  note('mvNote', '');
+  renderMyVoices();
+  updateCreate();
+  $('dlgMyVoice').showModal();
+});
+$('btnMvClose').addEventListener('click', () => $('dlgMyVoice').close());
+$('dlgMyVoice').addEventListener('close', () => { recSrc.stop(); recCon.stop(); });
+$('btnMvCreate').addEventListener('click', async () => {
+  const key = requireKey('mvNote');
+  if (!key) return;
+  const name = $('mvName').value.trim() || 'わたしの声';
+  const store = ((document.querySelector('input[name=mvStore]:checked') || {}).value || 'store') !== 'stateless';
+  const model = $('model').value;
+  S.busy = true;
+  updateCreate();
+  setLive(true);
+  note('mvNote', '声を登録中…（数十秒かかることがあります）');
+  try {
+    const r = await N.replicateVoice({ key, model, name, source: recSrc.wav.bytes, consent: recCon.wav.bytes, store });
+    N.myVoices.add({ id: r.id, name, created: Date.now(), stateless: r.stateless, model });
+    renderVoiceSelect(OWN + r.id);
+    N.prefs.set({ voicePreset: OWN + r.id });
+    renderMyVoices();
+    recSrc.reset();
+    recCon.reset();
+    $('mvAgree').checked = false;
+    $('mvName').value = '';
+    note('mvNote', `「${name}」を登録しました。ステップ03の「声」で選ばれています。`, 'ok');
+  } catch (err) {
+    showError('mvNote', err);
+  } finally {
+    S.busy = false;
+    setLive(false);
+    updateCreate();
+  }
+});
+
+/* ---------------- hero: a row of voice bars ---------------- */
+(() => {
+  const box = $('heroWave'), n = 72;
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1), env = Math.pow(Math.sin(Math.PI * t), 0.7);
+    const h = 0.14 + 0.86 * env * (0.45 + 0.55 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.43)));
+    const bar = el('span');
+    bar.style.height = `${Math.round(h * 100)}%`;
+    bar.style.animationDelay = `${-((i * 0.37) % 2.8).toFixed(2)}s`;
+    box.append(bar);
+  }
+})();
+
 /* ---------------- terms dialog ---------------- */
 $('btnTerms').addEventListener('click', () => $('dlgTerms').showModal());
 $('btnTermsClose').addEventListener('click', () => $('dlgTerms').close());
 for (const dlg of document.querySelectorAll('dialog')) {
-  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });   // click on the backdrop
+  dlg.addEventListener('click', e => {                                          // click on the backdrop (outside the box)
+    if (e.target !== dlg) return;
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
 }
 
 /* ---------------- start ---------------- */
 renderRegions();
 renderCards();
 renderStrength();
-updateAutoVoiceLabel();
+renderVoiceSelect(prefs.voicePreset);
 updatePriceNote();
 updateCount();
 updateBadge();

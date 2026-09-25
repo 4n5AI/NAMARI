@@ -40,6 +40,18 @@ N.voiceCache = {
   clear() { remove('local', VOICES_NAME); },
 };
 
+/* ---------------- the user's own voices (Voice replication) ----------------
+   [{id: voice_... | voicekey_..., name, created, stateless, model}]. A voicekey works for anyone
+   who holds it, so it lives next to the API key and nowhere else. */
+const MYVOICES_NAME = 'namari.myvoices.v1';
+N.myVoices = {
+  all() { const v = readJson(MYVOICES_NAME, []); return Array.isArray(v) ? v.filter(x => x && x.id) : []; },
+  get(id) { return this.all().find(v => v.id === id) || null; },
+  add(v) { const list = this.all().filter(x => x.id !== v.id); list.unshift(v); write('local', MYVOICES_NAME, JSON.stringify(list)); },
+  remove(id) { write('local', MYVOICES_NAME, JSON.stringify(this.all().filter(v => v.id !== id))); },
+  expires(v) { return v.created + (v.stateless ? 7 : 365) * 86400000; },
+};
+
 /* ---------------- preferences (never the text itself) ---------------- */
 N.prefs = {
   get() { return readJson(PREFS_NAME, {}); },
