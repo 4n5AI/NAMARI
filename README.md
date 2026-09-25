@@ -20,6 +20,7 @@
 - **APIキーはブラウザにだけ保存:** localStorage／sessionStorage を選べます。送信先は Gemini API だけです
 - **静的サイト:** `index.html` 1枚（読み込む外部ファイルなし。mp4-muxer も埋め込み済み）。CSP は meta タグで設定しています
 - **AI から使える:** ローカル MCP サーバー（Claude など）と、入力済みで開くリンク（どのAIでも）
+- **PWA:** ホーム画面・デスクトップに入れて使え、オフラインでも画面・履歴・動画書き出しが使えます
 
 ### 対応している方言（20方言＋標準語）
 
@@ -51,6 +52,21 @@
 - **波形表示:** 生成した音声の波形を Canvas で表示します。クリックや左右キーで再生位置を移動できます
 - **履歴:** 生成した音声を、このブラウザ（IndexedDB）に最新20件まで保存します。再生・再ダウンロード・削除ができます
 - **デザイン:** 声の信号をイメージした、紫から水色へのグラデーションを使っています。ライト／ダークモードに対応しています
+
+## アプリとして使う（PWA）
+
+ホーム画面やデスクトップに入れて、アプリのように使えます。
+
+| 環境 | 入れ方 |
+|---|---|
+| Chrome・Edge（PC・Android） | 画面上部の「アプリとして入れる」、またはアドレスバーのインストールのアイコン |
+| iPhone・iPad | 共有ボタン →「ホーム画面に追加」（「アプリとして入れる」を押すと手順が出ます） |
+| Mac の Safari | 「ファイル」→「Dockに追加」 |
+
+- **オフラインでも使えるもの:** 画面の表示、履歴の再生・保存、縦型動画の書き出し、使い方
+- **ネット接続が必要なもの:** 方言の変換・読み上げ・声の登録（Gemini API を使うため）
+- Service Worker（`sw.js`）が保存するのは、アプリの画面・マニフェスト・アイコンだけです。Gemini API との通信は保存しません。画面はネットにつながるときは毎回最新版を取得し、つながらないときだけ保存したものを使います
+- iPhone・iPad のホーム画面のアプリは、Safari と保存場所（APIキー・履歴）が別です。アプリ側で APIキーをもう一度入力してください
 
 ## AI から使う（MCP・リンク）
 
@@ -109,10 +125,14 @@ python3 -m http.server 8000
 
 ```
 index.html              ← build.py の出力（GitHub Pages で公開するファイル）
-build.py                ← index.html と mcp/namari.mcpb を作る（CSP のハッシュも埋め込む）
+manifest.webmanifest    ← build.py の出力（PWA のマニフェスト）
+sw.js                   ← build.py の出力（Service Worker。元は app/sw.js）
+icons/                  ← PWA のアイコン（192・512・マスカブル・iPhone 用）
+build.py                ← index.html・PWA のファイル・mcp/namari.mcpb を作る（CSP のハッシュも埋め込む）
 VERSION
 app/body.html           ← 画面の HTML
 app/style.css           ← スタイル（ライト／ダーク）
+app/sw.js               ← Service Worker の元（キャッシュ名とファイル一覧を build.py が入れる）
 src/01_util.js          ← 共通処理、base64・WAV処理、タグの照合
 src/02_storage.js       ← APIキー、作成した声の記録、設定、履歴（IndexedDB）
 src/03_api.js           ← Gemini API クライアント（変換・TTS・Voice design・Voice replication）
@@ -120,6 +140,7 @@ src/04_dialects.js      ← 方言データ、声・感情のプリセット
 src/05_waveform.js      ← 波形表示（Canvas 2D）
 src/06_recorder.js      ← マイク録音、24kHz モノラル WAV への変換
 src/07_video.js         ← 縦型動画：字幕のタイミング、描画、エンコード
+src/08_pwa.js           ← PWA：Service Worker の登録、「アプリとして入れる」ボタン、オフライン表示
 vendor/mp4-muxer.js     ← MP4 の書き出し（mp4-muxer 5.2.2、MIT License）
 src/10_ui.js            ← 画面の動作
 dev/test.html           ← API疎通テスト
@@ -136,6 +157,7 @@ mcp/namari.mcpb         ← build.py の出力（Claude デスクトップ版に
 - [x] 追加：自分の声（Voice replication）、デザイン刷新
 - [x] フェーズ4：字幕付き縦型MP4の書き出し
 - [x] 追加：AI 連携（ローカル MCP サーバー・入力済みリンク）、設定画面のタブ（設定／使い方／AI連携）
+- [x] 追加：PWA（インストール・オフライン表示）
 
 ## License
 

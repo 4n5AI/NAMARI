@@ -80,7 +80,7 @@ a { color: var(--link); }
 .ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; flex: none; }
 
 /* ---------- header ---------- */
-.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line); }
+.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(10px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left)); background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line); }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; color: inherit; text-decoration: none; }
 .logo { display: inline-flex; align-items: center; gap: 2.5px; height: 24px; }
 .logo i { display: block; width: 3.5px; border-radius: 2px; background: linear-gradient(180deg, var(--g1), var(--g2)); transform-origin: center; }
@@ -99,6 +99,10 @@ a { color: var(--link); }
 .nowrap { white-space: nowrap; }
 .hero-title { margin: 0; font-size: clamp(28px, 6.4vw, 46px); line-height: 1.22; font-weight: 800; letter-spacing: -0.01em; }
 .lead { margin: 12px 0 0; color: var(--muted); font-size: 15px; }
+.install-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 14px; }
+.install-row .hint { margin: 0; }
+.install-btn { font-weight: 700; border-color: var(--g1); color: var(--text); background: color-mix(in srgb, var(--g1) 10%, transparent); }
+.install-btn:hover { border-color: var(--g2); }
 .hero-wave { display: flex; align-items: center; gap: 3px; height: 56px; margin: 22px 0 6px; overflow: hidden; }
 .hero-wave span { flex: 1 1 0; min-width: 2px; border-radius: 3px; background: linear-gradient(180deg, var(--g1), var(--g2)); opacity: 0.85; }
 @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
@@ -195,7 +199,7 @@ button.link { padding: 0; border: 0; background: none; color: var(--link); text-
 .hist-actions { display: flex; gap: 6px; flex: none; }
 
 /* ---------- footer ---------- */
-.foot { max-width: 780px; margin: 0 auto; padding: 8px 16px 36px; font-size: 13px; color: var(--muted); text-align: center; }
+.foot { max-width: 780px; margin: 0 auto; padding: 8px 16px calc(36px + env(safe-area-inset-bottom)); font-size: 13px; color: var(--muted); text-align: center; }
 .foot p { margin: 4px 0; }
 .foot a { color: inherit; }
 

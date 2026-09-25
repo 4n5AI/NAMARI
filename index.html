@@ -1,10 +1,10 @@
 <!doctype html>
-<!--! NAMARI v0.6.0 | MIT License | (c) 2026 4n5-Studio | https://github.com/4n5AI/NAMARI -->
+<!--! NAMARI v0.7.0 | MIT License | (c) 2026 4n5-Studio | https://github.com/4n5AI/NAMARI -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2MgYNG8lJZy5p1vNyVk7iouPtUUVN3s5Y9fPb4AWXMM=' 'sha256-5EQptPFCqkqNXfziRmyKdbA2bcTf74n6dFlFXaSFhi4='; style-src 'sha256-ON3pR1pqTwwLp6swemzT64zLfeVDfyy6t+Bt6HEsg2E='; connect-src https://generativelanguage.googleapis.com; img-src data:; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2MgYNG8lJZy5p1vNyVk7iouPtUUVN3s5Y9fPb4AWXMM=' 'sha256-2NmasX9H8k4Sovxpf0X0qNaHHzdNCAW7hCQ5jeQKD5Q='; style-src 'sha256-Stvy3yy2SRY2ExpulhSqSBnVocOJo7MhIgIlONlXQZo='; connect-src https://generativelanguage.googleapis.com; img-src data: 'self'; manifest-src 'self'; worker-src 'self'; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
 <title>NAMARI — 方言ボイス・ジェネレーター</title>
 <meta name="description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など20の方言と、あなた自身の声で読み上げるブラウザ完結型ツール。Gemini API を使用。">
 <link rel="canonical" href="https://4n5ai.github.io/NAMARI/">
@@ -20,6 +20,12 @@
 <meta name="theme-color" content="#f5f6fb" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0a0b10" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%230a0b10'/%3E%3Cg fill='url%28%23g%29'%3E%3Crect x='12' y='26' width='6' height='12' rx='3'/%3E%3Crect x='21' y='17' width='6' height='30' rx='3'/%3E%3Crect x='30' y='10' width='6' height='44' rx='3'/%3E%3Crect x='39' y='20' width='6' height='24' rx='3'/%3E%3Crect x='48' y='27' width='6' height='10' rx='3'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NAMARI">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 /*! NAMARI | MIT License | (c) 2026 4n5-Studio */
 /* ---------- "studio / signal": ink + a violet -> cyan voice signal ----------
@@ -103,7 +109,7 @@ a { color: var(--link); }
 .ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; flex: none; }
 
 /* ---------- header ---------- */
-.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line); }
+.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(10px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left)); background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line); }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; color: inherit; text-decoration: none; }
 .logo { display: inline-flex; align-items: center; gap: 2.5px; height: 24px; }
 .logo i { display: block; width: 3.5px; border-radius: 2px; background: linear-gradient(180deg, var(--g1), var(--g2)); transform-origin: center; }
@@ -122,6 +128,10 @@ a { color: var(--link); }
 .nowrap { white-space: nowrap; }
 .hero-title { margin: 0; font-size: clamp(28px, 6.4vw, 46px); line-height: 1.22; font-weight: 800; letter-spacing: -0.01em; }
 .lead { margin: 12px 0 0; color: var(--muted); font-size: 15px; }
+.install-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 14px; }
+.install-row .hint { margin: 0; }
+.install-btn { font-weight: 700; border-color: var(--g1); color: var(--text); background: color-mix(in srgb, var(--g1) 10%, transparent); }
+.install-btn:hover { border-color: var(--g2); }
 .hero-wave { display: flex; align-items: center; gap: 3px; height: 56px; margin: 22px 0 6px; overflow: hidden; }
 .hero-wave span { flex: 1 1 0; min-width: 2px; border-radius: 3px; background: linear-gradient(180deg, var(--g1), var(--g2)); opacity: 0.85; }
 @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
@@ -218,7 +228,7 @@ button.link { padding: 0; border: 0; background: none; color: var(--link); text-
 .hist-actions { display: flex; gap: 6px; flex: none; }
 
 /* ---------- footer ---------- */
-.foot { max-width: 780px; margin: 0 auto; padding: 8px 16px 36px; font-size: 13px; color: var(--muted); text-align: center; }
+.foot { max-width: 780px; margin: 0 auto; padding: 8px 16px calc(36px + env(safe-area-inset-bottom)); font-size: 13px; color: var(--muted); text-align: center; }
 .foot p { margin: 4px 0; }
 .foot a { color: inherit; }
 
@@ -341,6 +351,11 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
       <p class="eyebrow">DIALECT VOICE STUDIO</p>
       <h1 id="heroTitle" class="hero-title">その言葉を、<span class="nowrap"><span class="grad">お好みの方言</span>で。</span></h1>
       <p class="lead">標準語で書いて、方言と声を選ぶだけ。20の方言と、あなた自身の声で読み上げます。</p>
+      <div id="installRow" class="install-row" hidden>
+        <button id="btnInstall" type="button" class="install-btn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>アプリとして入れる</button>
+        <span class="hint">ホーム画面やデスクトップから、アプリのように使えます</span>
+      </div>
+      <p id="netNote" class="note" aria-live="polite"></p>
       <div id="heroWave" class="hero-wave" aria-hidden="true"></div>
       <p id="linkNote" class="note" aria-live="polite"></p>
     </section>
@@ -417,7 +432,7 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
 
   <footer class="foot">
     <p>
-      <span>NAMARI v0.6.0</span> ·
+      <span>NAMARI v0.7.0</span> ·
       <span>MIT License © 2026 4n5-Studio</span> ·
       <button id="btnHelp" type="button" class="link" aria-haspopup="dialog">使い方</button> ·
       <button id="btnAI" type="button" class="link" aria-haspopup="dialog">AI連携</button> ·
@@ -525,6 +540,17 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
   </div>
 </dialog>
 
+<!-- ================= install guide (iPhone / iPad / Mac Safari) ================= -->
+<dialog id="dlgInstall" class="dlg" aria-labelledby="dlgInstallTitle">
+  <div class="dlg-body">
+    <p class="eyebrow">INSTALL</p>
+    <h2 id="dlgInstallTitle">アプリとして入れる</h2>
+    <ol id="installSteps" class="steps"></ol>
+    <p id="installNote" class="hint"></p>
+    <div class="dlg-actions"><button id="btnInstallClose" type="button" class="primary">OK</button></div>
+  </div>
+</dialog>
+
 <!-- ================= settings ================= -->
 <dialog id="dlgSettings" class="dlg dlg-wide" aria-label="設定と使い方">
   <div class="dlg-body">
@@ -611,6 +637,16 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
         <li>名前を付けて登録すると、「声」の欄で選べるようになります。</li>
       </ol>
       <p class="hint">登録できるのは、あなた自身の声だけです。</p>
+      <h3>アプリとして使う（PWA）</h3>
+      <p>NAMARI は、ホーム画面やデスクトップに入れて、アプリのように使えます。</p>
+      <ul class="bullets">
+        <li><strong>Chrome・Edge（PC・Android）</strong>：画面上部の「アプリとして入れる」、またはアドレスバーのインストールのアイコン</li>
+        <li><strong>iPhone・iPad</strong>：共有ボタン →「ホーム画面に追加」</li>
+        <li><strong>Mac の Safari</strong>：「ファイル」→「Dockに追加」</li>
+      </ul>
+      <div class="row"><button id="btnInstall2" type="button" class="small" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>アプリとして入れる</button><span id="installHelpState" class="small muted"></span></div>
+      <p id="installDone" class="note" aria-live="polite"></p>
+      <p class="hint">オフラインでも、履歴の再生・保存、動画の書き出し、この使い方は使えます。変換と読み上げは Gemini API を使うので、ネット接続が必要です。iPhone・iPad のホーム画面のアプリは Safari と保存場所が別なので、アプリ側で APIキーをもう一度入力してください。</p>
       <h3>困ったとき</h3>
       <dl class="faq">
         <dt>「APIキーが正しくありません」と出る</dt>
@@ -4116,6 +4152,100 @@ async function encode(scene, vc, ac, size, { onProgress, signal }) {
   if (onProgress) onProgress(1, '完了');
   return { blob: new Blob([target.buffer], { type: 'video/mp4' }), codec: vc.label, audio: ac.mux.toUpperCase(), seconds: duration, frames: total };
 }
+})();
+
+/*! NAMARI | MIT License | (c) 2026 4n5-Studio */
+/* ============================================================
+   NAMARI — PWA: service worker registration, 「アプリとして入れる」 button
+   - Chrome / Edge / Android: the browser's own install prompt (beforeinstallprompt)
+   - iPhone / iPad, Mac Safari: step-by-step instructions (no prompt API there)
+   - hidden when already running as an app or when the browser cannot install
+   ============================================================ */
+(() => {
+'use strict';
+if (!document.getElementById('app')) return;
+const $ = id => document.getElementById(id);
+
+/* ---------- service worker (https or localhost only) ---------- */
+const secure = location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname);
+if ('serviceWorker' in navigator && secure) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => { /* private mode etc.: the page still works online */ });
+  });
+}
+
+/* ---------- where are we? ---------- */
+const ua = navigator.userAgent || '';
+const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);   // iPadOS reports a Mac UA
+const isMacSafari = !isIOS && /Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|Edg\/|OPR\//.test(ua);
+const GUIDES = {
+  ios: {
+    steps: ['画面下（iPad は右上）の共有ボタン（□に↑のマーク）を押します。', '「ホーム画面に追加」を選びます（見当たらないときは、メニューを下にスクロールします）。', '右上の「追加」を押すと、ホーム画面に NAMARI が入ります。'],
+    note: 'ホーム画面から開いたアプリは、Safari とは保存場所が別になります。アプリ側で APIキーをもう一度入力してください。',
+  },
+  mac: {
+    steps: ['メニューバーの「ファイル」→「Dockに追加」を選びます。', '「追加」を押すと、Dock と Launchpad に NAMARI が入ります。'],
+    note: 'アプリとして開くと、アドレスバーのない専用ウインドウで使えます。',
+  },
+};
+
+let deferred = null;                                           // the saved beforeinstallprompt event
+const buttons = () => [$('btnInstall'), $('btnInstall2')].filter(Boolean);
+function refresh() {
+  const can = !standalone() && (!!deferred || isIOS || isMacSafari);
+  $('installRow').hidden = !can;
+  for (const b of buttons()) b.hidden = !can;
+  if ($('installHelpState')) {
+    $('installHelpState').textContent = standalone() ? 'いまはアプリとして開いています。'
+      : can ? '' : 'このブラウザでは、画面からは入れられません。Chrome・Edge・Safari で開いてください。';
+  }
+}
+function showGuide(kind) {
+  const g = GUIDES[kind];
+  const list = $('installSteps');
+  list.textContent = '';
+  for (const s of g.steps) { const li = document.createElement('li'); li.textContent = s; list.append(li); }
+  $('installNote').textContent = g.note;
+  $('dlgInstall').showModal();
+}
+async function install() {
+  if (deferred) {
+    const ev = deferred;
+    deferred = null;                                             // a prompt can only be shown once
+    ev.prompt();
+    try { await ev.userChoice; } catch (e) { /* dismissed */ }
+    refresh();
+    return;
+  }
+  if (isIOS) showGuide('ios');
+  else if (isMacSafari) showGuide('mac');
+}
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; refresh(); });
+window.addEventListener('appinstalled', () => {
+  deferred = null;
+  refresh();
+  const n = $('installDone');
+  if (n) { n.textContent = 'インストールしました。ホーム画面・デスクトップ・アプリ一覧から開けます。'; n.className = 'note ok'; }
+});
+if (window.matchMedia) {
+  const mq = matchMedia('(display-mode: standalone)');
+  if (mq.addEventListener) mq.addEventListener('change', refresh);
+}
+for (const b of buttons()) b.addEventListener('click', install);
+$('btnInstallClose').addEventListener('click', () => $('dlgInstall').close());
+
+/* ---------- online / offline ---------- */
+function net() {
+  const n = $('netNote');
+  if (navigator.onLine) { n.textContent = ''; n.className = 'note'; return; }
+  n.textContent = 'オフラインです。履歴の再生・保存と動画の書き出しは使えます。変換と読み上げは、ネットにつながると使えます。';
+  n.className = 'note warn';
+}
+window.addEventListener('online', net);
+window.addEventListener('offline', net);
+net();
+refresh();
 })();
 
 /*! NAMARI | MIT License | (c) 2026 4n5-Studio */

@@ -1,5 +1,6 @@
-"""Build the single-file NAMARI app for GitHub Pages, and the MCP bundle.
+"""Build the single-file NAMARI app for GitHub Pages, its PWA files, and the MCP bundle.
 usage: python3 build.py   -> index.html (vendor/mp4-muxer.js + src/*.js + app/body.html + app/style.css, inlined)
+                          -> manifest.webmanifest + sw.js (installable app, offline shell; icons in icons/)
                           -> mcp/namari.mcpb (Claude desktop one-click install: mcp/server + the shared src files)
 
 The page carries its own Content-Security-Policy (GitHub Pages cannot set headers):
@@ -38,7 +39,9 @@ csp = '; '.join([
     f"script-src {sha(MUXER)} {sha(script)}",
     f"style-src {sha(style)}",
     f"connect-src {API_ORIGIN}",
-    'img-src data:',
+    "img-src data: 'self'",
+    "manifest-src 'self'",
+    "worker-src 'self'",
     'media-src blob:',
     "base-uri 'none'",
     "form-action 'none'",
@@ -68,6 +71,12 @@ html = f'''<!doctype html>
 <meta name="theme-color" content="#f5f6fb" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0a0b10" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="{favicon}">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NAMARI">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>{style}</style>
 </head>
 <body>
@@ -79,6 +88,24 @@ html = f'''<!doctype html>
 '''
 open('index.html', 'w', encoding='utf-8').write(html)
 print('index.html', len(html.encode('utf-8')), 'bytes,', len(sources), 'scripts')
+
+# ---------------- PWA: web app manifest + service worker ----------------
+ICONS = [('icons/icon-192.png', '192x192', 'any'), ('icons/icon-512.png', '512x512', 'any'), ('icons/icon-maskable-512.png', '512x512', 'maskable')]
+webmanifest = {
+    'name': TITLE, 'short_name': 'NAMARI', 'description': DESCRIPTION, 'lang': 'ja', 'dir': 'ltr',
+    'id': './', 'start_url': './', 'scope': './', 'display': 'standalone', 'orientation': 'any',
+    'background_color': '#0a0b10', 'theme_color': '#0a0b10', 'categories': ['entertainment', 'productivity', 'utilities'],
+    'icons': [{'src': src, 'sizes': size, 'type': 'image/png', 'purpose': purpose} for src, size, purpose in ICONS],
+}
+open('manifest.webmanifest', 'w', encoding='utf-8').write(json.dumps(webmanifest, ensure_ascii=False, indent=2) + '\n')
+PRECACHE = ['./', 'manifest.webmanifest', 'icons/apple-touch-icon.png'] + [src for src, _, _ in ICONS]
+digest = hashlib.sha256()
+for f in ['index.html', 'manifest.webmanifest', 'icons/apple-touch-icon.png'] + [src for src, _, _ in ICONS]:
+    digest.update(open(f, 'rb').read())
+sw = read('app/sw.js').replace('@CACHE@', f'{VERSION}-{digest.hexdigest()[:10]}').replace('@ASSETS@', json.dumps(PRECACHE))
+if '@CACHE@' in sw or '@ASSETS@' in sw: raise ValueError('unfilled sw.js placeholder')
+open('sw.js', 'w', encoding='utf-8').write(sw)
+print('manifest.webmanifest + sw.js (cache', f'namari-{VERSION}-{digest.hexdigest()[:10]})')
 
 # ---------------- MCP bundle (.mcpb = zip with manifest.json) ----------------
 MCP_LIB = ['src/01_util.js', 'src/03_api.js', 'src/04_dialects.js']      # the browser code the MCP server reuses
