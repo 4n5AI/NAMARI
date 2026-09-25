@@ -176,11 +176,16 @@ N.EMOTIONS = [
   { id: 'sad', label: 'しんみり', style: 'sad and quiet' },
 ];
 
-/* inline tag buttons (tags stay in English even inside Japanese text) */
-N.TAG_BUTTONS = [
-  { tag: '<laugh>', label: '笑い' },
-  { tag: '<sigh>', label: 'ため息' },
-  { tag: '<short pause>', label: '間' },
-  { tag: '<breath>', label: '息' },
-];
+/* inline tags (official Gemini 3.8 TTS vocal tags; they stay in English even inside Japanese text).
+   quick: shown as buttons under the text box; the rest open from 「その他のタグ」 */
+N.TAG_GROUPS = [
+  { label: '間', tags: [['<short pause>', '短い間', 1], ['<long pause>', '長い間']] },
+  { label: '笑い', tags: [['<laugh>', '笑い', 1], ['<laughter>', '大笑い'], ['<chuckle>', 'くすっと'], ['<giggle>', 'くすくす'], ['<snicker>', '忍び笑い'], ['<cackle>', '高笑い']] },
+  { label: '息', tags: [['<breath>', '息', 1], ['<sigh>', 'ため息', 1], ['<exhales>', '息を吐く'], ['<heavy breath>', '荒い息'], ['<gasp>', '息をのむ'], ['<pant>', '息切れ'], ['<phew>', 'ふぅ（安心）']] },
+  { label: '感情', tags: [['<cheer>', '歓声'], ['<shout>', '叫ぶ'], ['<scream>', '悲鳴'], ['<shriek>', '金切り声'], ['<cry>', '泣く'], ['<sob>', 'すすり泣き'], ['<whimper>', 'べそをかく'], ['<groan>', 'うめく'], ['<growl>', 'うなる'], ['<grr>', 'ぐるる'], ['<argh>', 'うわっ'], ['<pff>', 'ぷっ']] },
+  { label: 'しぐさ', tags: [['<whispers>', 'ささやく'], ['<tsk>', '舌打ち'], ['<hiss>', 'しーっ'], ['<cough>', '咳'], ['<throat-clearing>', '咳払い'], ['<sneeze>', 'くしゃみ'], ['<yawn>', 'あくび'], ['<snort>', '鼻で笑う'], ['<grunt>', 'ふんっ']] },
+].map(g => ({ label: g.label, tags: g.tags.map(([tag, label, quick]) => ({ tag, label, quick: !!quick })) }));
+N.TAG_BUTTONS = N.TAG_GROUPS.flatMap(g => g.tags).filter(t => t.quick)
+  .sort((a, b) => ['<laugh>', '<sigh>', '<short pause>', '<breath>'].indexOf(a.tag) - ['<laugh>', '<sigh>', '<short pause>', '<breath>'].indexOf(b.tag))
+  .map(t => Object.assign({}, t, { label: { '<short pause>': '間' }[t.tag] || t.label }));
 })();

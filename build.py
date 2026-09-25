@@ -1,5 +1,5 @@
 """Build the single-file NAMARI app for GitHub Pages.
-usage: python3 build.py   -> index.html (src/*.js + app/body.html + app/style.css, inlined)
+usage: python3 build.py   -> index.html (vendor/mp4-muxer.js + src/*.js + app/body.html + app/style.css, inlined)
 
 The page carries its own Content-Security-Policy (GitHub Pages cannot set headers):
 the inline <script> and <style> are allowed by their SHA-256 hashes, and the only
@@ -23,17 +23,18 @@ FAVICON = ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>"
            "<rect x='48' y='27' width='6' height='10' rx='3'/></g></svg>")
 
 sources = sorted(glob.glob('src/*.js'))
+MUXER = '\n/*! mp4-muxer v5.2.2 | MIT License | (c) 2023 Vanilagy | see THIRD_PARTY_NOTICES.md */\n' + read('vendor/mp4-muxer.js') + '\n'
 script = '\n' + '\n'.join(read(f) for f in sources).replace('@VERSION@', VERSION) + '\n'
 style = '\n' + read('app/style.css') + '\n'
 body = read('app/body.html').replace('@VERSION@', VERSION)
-for name, text, tag in (('script', script, '</script'), ('style', style, '</style')):
+for name, text, tag in (('script', script, '</script'), ('mp4-muxer', MUXER, '</script'), ('style', style, '</style')):
     if tag in text.lower(): raise ValueError(f'{name} must not contain {tag}')
 if '@VERSION@' in body + script: raise ValueError('unreplaced @VERSION@')
 
 sha = lambda s: "'sha256-" + base64.b64encode(hashlib.sha256(s.encode('utf-8')).digest()).decode() + "'"
 csp = '; '.join([
     "default-src 'none'",
-    f"script-src {sha(script)}",
+    f"script-src {sha(MUXER)} {sha(script)}",
     f"style-src {sha(style)}",
     f"connect-src {API_ORIGIN}",
     'img-src data:',
@@ -70,6 +71,7 @@ html = f'''<!doctype html>
 </head>
 <body>
 {body}
+<script>{MUXER}</script>
 <script>{script}</script>
 </body>
 </html>
