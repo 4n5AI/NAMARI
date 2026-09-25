@@ -99,6 +99,24 @@ async function call(key, method, path, body, { signal, onRetry } = {}) {
 }
 N.apiCall = call;
 
+/* POST /interactions. store:false and thinking_level are niceties: if the API ever
+   rejects one of them as an unknown field, drop it and send once more. */
+const OPTIONAL_FIELDS = [
+  ['store', b => { delete b.store; }],
+  ['thinking', b => { if (b.generation_config) delete b.generation_config.thinking_level; }],
+];
+async function interact(key, body, opts) {
+  try {
+    return await call(key, 'POST', '/interactions', body, opts);
+  } catch (err) {
+    const hit = err instanceof ApiError && err.kind === 'bad' && OPTIONAL_FIELDS.find(([word]) => err.detail.toLowerCase().includes(word));
+    if (!hit) throw err;
+    const retry = JSON.parse(JSON.stringify(body));
+    hit[1](retry);
+    return call(key, 'POST', '/interactions', retry, opts);
+  }
+}
+
 /* ---------------- response helpers ---------------- */
 const STATUS_MSG = {
   incomplete: '出力が途中で止まりました（長さの上限など）。テキストを短く分けて、もう一度お試しください。',
@@ -158,7 +176,7 @@ N.convertDialect = async ({ key, text, name, hint, strength, signal, onRetry }) 
     generation_config: { thinking_level: 'low' },
     store: false,
   };
-  const it = await call(key, 'POST', '/interactions', body, { signal, onRetry });
+  const it = await interact(key, body, { signal, onRetry });
   checkStatus(it);
   const out = cleanText(N.pickText(it));
   if (!out) throw new ApiError('方言テキストが返ってきませんでした。もう一度お試しください。', { kind: 'empty' });
@@ -176,7 +194,7 @@ N.tts = async ({ key, model, text, style, voice, signal, onRetry }) => {
     generation_config: { speech_config: [{ voice }] },
     store: false,
   };
-  const it = await call(key, 'POST', '/interactions', body, { signal, onRetry });
+  const it = await interact(key, body, { signal, onRetry });
   checkStatus(it);
   const audio = N.pickAudio(it);
   if (!audio) throw new ApiError('音声データが返ってきませんでした。テキストが空・記号だけになっていないか確認してください。', { kind: 'empty' });
@@ -205,6 +223,76 @@ N.listVoices = ({ key, filters = {}, signal }) => {
   const q = new URLSearchParams();
   for (const [k, v] of Object.entries(filters)) for (const x of [].concat(v)) if (x !== '' && x != null) q.append(k, x);
   return call(key, 'GET', '/voices' + (q.toString() ? '?' + q : ''), null, { signal });
+};
+
+/* ---------------- dialect voices (option A) ----------------
+   One designed voice per dialect x preset x model, created on first use and cached
+   in this browser. Before creating, reuse a voice with the same display name
+   (e.g. made from another device with the same key) so the 200-voice quota lasts. */
+const FATAL = ['nokey', 'key', 'referrer', 'network'];
+const isFatal = err => (err && err.name === 'AbortError') || (err instanceof ApiError && FATAL.includes(err.kind));
+
+N.resolveVoice = async ({ key, dialect, preset, model, signal, onStage }) => {
+  const ck = N.voiceCacheKey(dialect, preset, model);
+  const hit = N.voiceCache.get(ck);
+  if (hit && hit.id) return { voice: hit.id, designed: true, cached: true };
+  const name = N.voiceDisplayName(dialect, preset, model);
+  try {
+    if (onStage) onStage('find');
+    let found = null;
+    try {
+      const r = await N.listVoices({ key, filters: { type: 'prompted', search: name, page_size: 50 }, signal });
+      found = (r.voices || []).find(v => v && v.id && v.display_name === name) || null;
+    } catch (err) { if (isFatal(err)) throw err; /* listing is only an optimisation */ }
+    if (found) {
+      const id = String(found.id).replace(/^voices\//, '');
+      N.voiceCache.set(ck, { id, name, created: Date.now(), reused: true });
+      return { voice: id, designed: true, reused: true };
+    }
+    if (onStage) onStage('create');
+    const made = await N.createVoice({ key, model, prompt: N.voiceDesignText(dialect, preset), displayName: name, gender: preset.gender, languageCode: 'ja-JP', signal });
+    N.voiceCache.set(ck, { id: made.id, name, created: Date.now() });
+    return { voice: made.id, designed: true, created: true };
+  } catch (err) {
+    if (isFatal(err)) throw err;
+    return { voice: preset.fallback, designed: false, error: err };     // prebuilt voice, weaker accent
+  }
+};
+
+/* resolve the voice, then TTS. A cached voice that has expired / been deleted is recreated
+   once; a designed voice the model refuses falls back to the preset's prebuilt voice. */
+N.synthesize = async ({ key, dialect, preset, model, text, style, signal, onStage, onRetry }) => {
+  let v = await N.resolveVoice({ key, dialect, preset, model, signal, onStage });
+  const speak = voice => { if (onStage) onStage('speak'); return N.tts({ key, model, text, style, voice, signal, onRetry }); };
+  let res;
+  try {
+    res = await speak(v.voice);
+  } catch (err) {
+    if (!v.designed || isFatal(err) || !(err instanceof ApiError)) throw err;
+    if (err.kind === 'notfound') {
+      N.voiceCache.del(N.voiceCacheKey(dialect, preset, model));
+      v = await N.resolveVoice({ key, dialect, preset, model, signal, onStage });
+      res = await speak(v.voice);
+    } else if (err.kind === 'bad') {
+      v = { voice: preset.fallback, designed: false, error: err };
+      res = await speak(v.voice);
+    } else throw err;
+  }
+  return Object.assign(res, { voice: v.voice, designed: v.designed, voiceCreated: !!v.created, voiceError: v.error || null });
+};
+
+/* delete every voice this browser created (quota housekeeping); returns {deleted, failed} */
+N.deleteCachedVoices = async ({ key, signal }) => {
+  let deleted = 0, failed = 0;
+  for (const [ck, v] of Object.entries(N.voiceCache.all())) {
+    try { await N.deleteVoice({ key, id: v.id, signal }); deleted++; N.voiceCache.del(ck); }
+    catch (err) {
+      if (err instanceof ApiError && err.kind === 'notfound') { N.voiceCache.del(ck); continue; }
+      if (isFatal(err)) throw err;
+      failed++;
+    }
+  }
+  return { deleted, failed };
 };
 
 /* ---------------- cost estimate (USD) ---------------- */
