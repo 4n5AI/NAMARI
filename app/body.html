@@ -26,10 +26,12 @@
         <div class="tags" role="group" aria-label="タグを挿入">
           <span class="muted small">挿入</span>
           <span id="tagButtons" class="tag-buttons"></span>
+          <button id="btnMoreTags" type="button" class="small more-tags" aria-expanded="false" aria-controls="tagPalette">その他のタグ</button>
         </div>
         <span id="srcCount" class="count" aria-live="polite">0 / 1000</span>
       </div>
-      <p class="hint">タグ（&lt;laugh&gt; など）は、その位置で笑い・ため息・間・息を入れる合図です。読み上げられません。</p>
+      <div id="tagPalette" class="tag-palette" hidden></div>
+      <p class="hint">タグ（&lt;laugh&gt; など）は、その位置で笑い・息・間などを入れる合図で、読み上げられません。方言に変換してもそのまま残ります。</p>
     </section>
 
     <!-- ================= step 2 ================= -->
@@ -66,7 +68,10 @@
         <canvas id="wave" class="wave" role="slider" tabindex="0" aria-label="再生位置（クリック・左右キーで移動）" aria-valuemin="0"></canvas>
         <audio id="player" controls preload="auto"></audio>
         <div class="row between">
-          <a id="btnDownload" class="button" download>WAVをダウンロード</a>
+          <span class="row-tight">
+            <a id="btnDownload" class="button" download>WAVをダウンロード</a>
+            <button id="btnVideo" type="button" aria-haspopup="dialog"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 9.5v5l4-2.5z"/></svg>縦型動画（MP4）</button>
+          </span>
           <span id="resultMeta" class="muted small"></span>
         </div>
       </div>
@@ -155,6 +160,42 @@
   </div>
 </dialog>
 
+<!-- ================= vertical video (phase 4) ================= -->
+<dialog id="dlgVideo" class="dlg dlg-wide" aria-labelledby="dlgVideoTitle">
+  <div class="dlg-body">
+    <p class="eyebrow">VIDEO</p>
+    <h2 id="dlgVideoTitle">字幕付きの縦型動画（9:16）</h2>
+    <p class="hint">TikTok・Instagram リール・YouTube ショート向けの MP4 を、このブラウザの中で作ります（どこにもアップロードしません）。</p>
+    <p id="vidUnsupported" class="note ng" hidden></p>
+    <div class="vid-layout">
+      <canvas id="vidPreview" class="vid-preview" width="540" height="960" aria-label="動画のプレビュー"></canvas>
+      <div class="vid-options">
+        <label class="field-label">サイズ<select id="vidSize"></select></label>
+        <label class="field-label">背景<select id="vidTheme"><option value="dark">ダーク</option><option value="light">ライト</option></select></label>
+        <fieldset class="radios">
+          <legend class="field-label">表示するもの</legend>
+          <label class="check"><input id="vidCaptions" type="checkbox" checked> 方言の字幕</label>
+          <label class="check"><input id="vidTrans" type="checkbox" checked> 標準語の訳（字幕の下に小さく）</label>
+          <label class="check"><input id="vidLogo" type="checkbox" checked> NAMARI のロゴ</label>
+        </fieldset>
+        <p id="vidTransNote" class="hint"></p>
+        <button id="btnVidExport" type="button" class="primary wide">MP4 を書き出す</button>
+        <div id="vidProgressBox" class="vid-progress" hidden>
+          <progress id="vidProgress" max="1" value="0"></progress>
+          <div class="row between"><span id="vidStatus" class="small muted"></span><button id="btnVidCancel" type="button" class="small">中止</button></div>
+        </div>
+        <p id="vidNote" class="note" aria-live="polite"></p>
+        <div id="vidResult" class="vid-result" hidden>
+          <video id="vidPlayer" controls playsinline></video>
+          <a id="btnVidDownload" class="button primary" download>MP4 をダウンロード</a>
+        </div>
+      </div>
+    </div>
+    <p class="hint">字幕のタイミングは、音声の間（ま）から自動で合わせています。字幕の文字は読み上げた方言テキストです（タグは表示しません）。</p>
+    <div class="dlg-actions"><button id="btnVidClose" type="button" class="ghost">閉じる</button></div>
+  </div>
+</dialog>
+
 <!-- ================= settings ================= -->
 <dialog id="dlgSettings" class="dlg" aria-labelledby="dlgSettingsTitle">
   <div class="dlg-body">
@@ -221,6 +262,8 @@
     <p class="muted small">金額は100万トークンあたり（米ドル）。音声は1秒＝25トークンで、Flash TTS なら10秒で約 $0.0023 です。2027年1月から倍額の予定です。無料枠もあります。Voice design（声の作成）の料金は公式の料金表に記載がありません。最新の情報は <a href="https://ai.google.dev/gemini-api/docs/pricing" target="_blank" rel="noopener noreferrer">公式の料金ページ</a> を確認してください。</p>
     <h3>自分の声（Voice replication）</h3>
     <p>登録できるのは、あなた自身の声だけです。他人の声を、本人の同意なく複製しないでください。録音した音声は声の登録のために Gemini API にだけ送信し、このブラウザには保存しません（保存するのは声のIDまたはキーだけです）。「Google に保存しない」を選んだ場合のキー（voicekey_...）は、持っている人なら誰でもその声を使えるため、他人に共有しないでください。</p>
+    <h3>縦型動画（MP4）</h3>
+    <p>動画はこのブラウザの中で作ります（WebCodecs）。MP4 の書き出しには <a href="https://github.com/Vanilagy/mp4-muxer" target="_blank" rel="noopener noreferrer">mp4-muxer</a>（MIT License）を使っています。</p>
     <h3>方言について</h3>
     <p>方言への書き換えと発音は AI によるもので、実際の話し方と違う場合があります。「β」の方言は特に不安定です。変換後のテキストは手で直してから読み上げられます。</p>
     <div class="dlg-actions"><button id="btnTermsClose" type="button" class="primary">閉じる</button></div>

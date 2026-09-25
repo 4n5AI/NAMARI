@@ -31,6 +31,7 @@ const S = {
   busy: false,
   audioUrl: null,
   currentId: null,       // history id shown in the player
+  currentItem: null,     // what the player holds (source for the video export)
   lastArea: 'srcText',    // tag buttons insert into the textarea used last
 };
 S.region = N.dialect(S.dialect).region;
@@ -60,10 +61,8 @@ function showError(id, err) {
 }
 const onRetry = id => r => note(id, `混み合っています。${Math.ceil(r.wait / 1000)}秒待って再試行します（${r.attempt}/${r.max}回目）…`);
 
-const setLive = on => document.body.classList.toggle('live', on);   // wave / logo animate while a voice is being made
 function setBusy(on, label) {
   S.busy = on;
-  setLive(on);
   for (const id of ['btnConvert', 'btnGenerate']) $(id).disabled = on;
   $('btnGenerate').textContent = on && label ? label : '音声を生成';
 }
@@ -85,11 +84,25 @@ function insertTag(tag) {
   ta.focus();
   ta.dispatchEvent(new Event('input', { bubbles: true }));
 }
-for (const t of N.TAG_BUTTONS) {
-  const b = el('button', { type: 'button', title: `${t.tag} を挿入（最後に使った入力欄に入ります）` }, t.label);
+const tagButton = (t, cls) => {
+  const b = el('button', { type: 'button', class: cls || '', title: `${t.tag} を挿入（最後に使った入力欄に入ります）` }, t.label);
   b.addEventListener('click', () => insertTag(t.tag));
-  $('tagButtons').append(b);
+  return b;
+};
+for (const t of N.TAG_BUTTONS) $('tagButtons').append(tagButton(t));
+for (const g of N.TAG_GROUPS) {
+  const chips = el('div', { class: 'tag-chips' });
+  for (const t of g.tags) chips.append(tagButton(t));
+  $('tagPalette').append(el('div', { class: 'tag-group' }, el('span', { class: 'tag-group-label' }, g.label), chips));
 }
+const tagTotal = N.TAG_GROUPS.reduce((n, g) => n + g.tags.length, 0);
+function setPalette(open) {
+  $('tagPalette').hidden = !open;
+  $('btnMoreTags').setAttribute('aria-expanded', String(open));
+  $('btnMoreTags').textContent = open ? 'タグを閉じる' : `その他のタグ（${tagTotal}種）`;
+}
+$('btnMoreTags').addEventListener('click', () => setPalette($('tagPalette').hidden));
+setPalette(false);
 $('srcText').maxLength = MAX_CHARS;
 for (const id of ['srcText', 'dialectText']) $(id).addEventListener('focus', () => { S.lastArea = id; });
 $('srcText').addEventListener('input', () => { updateCount(); updateStale(); });
@@ -265,6 +278,7 @@ async function generate() {
     created: Date.now(), dialectId: d.id, dialectName: d.name,
     voiceLabel: own ? `自分の声（${own.name}）` : r.designed ? preset.label : `既定の声 ${r.voice}`, emotionLabel: emo.id === 'none' ? '' : emo.label,
     model, text, duration: dur, bytes: r.bytes,
+    srcText: !d.standard && S.converted && S.converted.dialect === d.id ? S.converted.src : '',   // for the video's translation line
     cost: usd(model, r.usage, Math.round(dur * N.AUDIO_TOKENS_PER_SEC)) + (conv ? usd(N.TEXT_MODEL, conv.usage) : 0),
   };
   showAudio(item);
@@ -285,6 +299,7 @@ function showAudio(item, { autoplay = true } = {}) {
   if (S.audioUrl) URL.revokeObjectURL(S.audioUrl);
   S.audioUrl = URL.createObjectURL(new Blob([item.bytes], { type: 'audio/wav' }));
   S.currentId = item.id || null;
+  S.currentItem = item;
   $('player').src = S.audioUrl;
   $('btnDownload').href = S.audioUrl;
   $('btnDownload').download = fileName(item);
@@ -465,7 +480,7 @@ function recorderWidget(root, onChange) {
   let levels = [];
   const say = (msg, kind = '') => { noteEl.textContent = msg; noteEl.className = 'note rec-note' + (kind ? ' ' + kind : ''); };
   const setTime = sec => { time.textContent = `${fmtClock(sec)} / ${fmtClock(maxSec)}`; };
-  const idle = () => { btn.classList.remove('recording'); label.textContent = w.wav ? '録り直す' : '録音する'; setLive(false); };
+  const idle = () => { btn.classList.remove('recording'); label.textContent = w.wav ? '録り直す' : '録音する'; };
   async function accept(buffer) {
     say('音声を整えています…');
     try {
@@ -515,7 +530,6 @@ function recorderWidget(root, onChange) {
     w.rec = rec;
     btn.classList.add('recording');
     label.textContent = '停止';
-    setLive(true);
     say(`録音中… 読み終わったら「停止」を押してください（${maxSec}秒で自動停止）。`);
   });
   if (file) file.addEventListener('change', async () => {
@@ -594,7 +608,6 @@ $('btnMvCreate').addEventListener('click', async () => {
   const model = $('model').value;
   S.busy = true;
   updateCreate();
-  setLive(true);
   note('mvNote', '声を登録中…（数十秒かかることがあります）');
   try {
     const r = await N.replicateVoice({ key, model, name, source: recSrc.wav.bytes, consent: recCon.wav.bytes, store });
@@ -611,12 +624,11 @@ $('btnMvCreate').addEventListener('click', async () => {
     showError('mvNote', err);
   } finally {
     S.busy = false;
-    setLive(false);
     updateCreate();
   }
 });
 
-/* ---------------- hero: a row of voice bars ---------------- */
+/* ---------------- hero: a static row of voice bars ---------------- */
 (() => {
   const box = $('heroWave'), n = 72;
   for (let i = 0; i < n; i++) {
@@ -624,10 +636,76 @@ $('btnMvCreate').addEventListener('click', async () => {
     const h = 0.14 + 0.86 * env * (0.45 + 0.55 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.43)));
     const bar = el('span');
     bar.style.height = `${Math.round(h * 100)}%`;
-    bar.style.animationDelay = `${-((i * 0.37) % 2.8).toFixed(2)}s`;
     box.append(bar);
   }
 })();
+
+/* ---------------- vertical video with captions (phase 4) ---------------- */
+fillSelect($('vidSize'), N.VIDEO_SIZES, prefs.vidSize);
+if (prefs.vidTheme) $('vidTheme').value = prefs.vidTheme === 'light' ? 'light' : 'dark';
+for (const [id, key] of [['vidCaptions', 'vidCaptions'], ['vidTrans', 'vidTrans'], ['vidLogo', 'vidLogo']]) if (typeof prefs[key] === 'boolean') $(id).checked = prefs[key];
+const vidOpts = () => ({ size: $('vidSize').value, theme: $('vidTheme').value, captions: $('vidCaptions').checked, translation: $('vidTrans').checked && !$('vidTrans').disabled, logo: $('vidLogo').checked });
+let vidAbort = null, vidUrl = null;
+function drawVideoPreview() {
+  const item = S.currentItem;
+  if (!item) return;
+  const trans = item.dialectId === 'standard' ? null : N.captionTranslations(item.text, item.srcText);
+  $('vidTrans').disabled = !trans;
+  $('vidTransNote').textContent = trans ? ''
+    : item.dialectId === 'standard' ? '標準語の音声なので、訳は表示しません。'
+    : !item.srcText ? '標準語の訳：元の文章がわからないため表示できません（変換せずに書いたテキストや、以前の履歴など）。'
+    : '標準語の訳：方言と標準語で文の数が違うため表示できません。';
+  const scene = new N.VideoScene(item, Object.assign(vidOpts(), { w: 540, h: 960 }));
+  const cap = scene.caps[0];
+  scene.draw($('vidPreview').getContext('2d'), cap ? Math.min(scene.duration, (cap.t0 + cap.t1) / 2) : scene.duration * 0.4);
+}
+for (const id of ['vidSize', 'vidTheme', 'vidCaptions', 'vidTrans', 'vidLogo']) {
+  $(id).addEventListener('change', () => {
+    N.prefs.set({ vidSize: $('vidSize').value, vidTheme: $('vidTheme').value, vidCaptions: $('vidCaptions').checked, vidTrans: $('vidTrans').checked, vidLogo: $('vidLogo').checked });
+    drawVideoPreview();
+  });
+}
+$('btnVideo').addEventListener('click', () => {
+  const ok = N.videoSupported();
+  $('vidUnsupported').hidden = ok;
+  $('vidUnsupported').textContent = ok ? '' : 'このブラウザは動画の書き出し（WebCodecs）に対応していません。Chrome・Edge・Safari の最新版で開いてください。';
+  $('btnVidExport').disabled = !ok;
+  $('vidResult').hidden = true;
+  note('vidNote', '');
+  $('dlgVideo').showModal();
+  drawVideoPreview();
+});
+$('btnVidExport').addEventListener('click', async () => {
+  const item = S.currentItem;
+  if (!item || vidAbort) return;
+  vidAbort = new AbortController();
+  $('btnVidExport').disabled = true;
+  $('vidProgressBox').hidden = false;
+  $('vidProgress').value = 0;
+  $('vidResult').hidden = true;
+  note('vidNote', '');
+  const t0 = performance.now();
+  try {
+    const r = await N.exportVideo(item, vidOpts(), { signal: vidAbort.signal, onProgress: (p, msg) => { $('vidProgress').value = p; $('vidStatus').textContent = msg; } });
+    if (vidUrl) URL.revokeObjectURL(vidUrl);
+    vidUrl = URL.createObjectURL(r.blob);
+    $('vidPlayer').src = vidUrl;
+    $('btnVidDownload').href = vidUrl;
+    $('btnVidDownload').download = fileName(item).replace(/\.wav$/, '.mp4');
+    $('vidResult').hidden = false;
+    note('vidNote', `できました（${N.fmtBytes(r.blob.size)} · ${r.codec} / ${r.audio} · ${((performance.now() - t0) / 1000).toFixed(1)}秒で書き出し）。`, 'ok');
+  } catch (err) {
+    const stopped = err && err.name === 'AbortError';
+    note('vidNote', stopped ? '書き出しを中止しました。' : (err && err.message) || '動画を書き出せませんでした。', stopped ? '' : 'ng');
+  } finally {
+    vidAbort = null;
+    $('btnVidExport').disabled = !N.videoSupported();
+    $('vidProgressBox').hidden = true;
+  }
+});
+$('btnVidCancel').addEventListener('click', () => { if (vidAbort) vidAbort.abort(); });
+$('btnVidClose').addEventListener('click', () => $('dlgVideo').close());
+$('dlgVideo').addEventListener('close', () => { if (vidAbort) vidAbort.abort(); $('vidPlayer').pause(); });
 
 /* ---------------- terms dialog ---------------- */
 $('btnTerms').addEventListener('click', () => $('dlgTerms').showModal());
