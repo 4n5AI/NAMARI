@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2MgYNG8lJZy5p1vNyVk7iouPtUUVN3s5Y9fPb4AWXMM=' 'sha256-2NmasX9H8k4Sovxpf0X0qNaHHzdNCAW7hCQ5jeQKD5Q='; style-src 'sha256-Stvy3yy2SRY2ExpulhSqSBnVocOJo7MhIgIlONlXQZo='; connect-src https://generativelanguage.googleapis.com; img-src data: 'self'; manifest-src 'self'; worker-src 'self'; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2MgYNG8lJZy5p1vNyVk7iouPtUUVN3s5Y9fPb4AWXMM=' 'sha256-GDJQvDnmcoFN+cHKoLrLxEG5DGGSZ0rexOlStUVD+eY='; style-src 'sha256-+mzGbtZJdMIa7O9AMchxsyjprQdi1YbMczPyCU+iJVM='; connect-src https://generativelanguage.googleapis.com; img-src data: 'self'; manifest-src 'self'; worker-src 'self'; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
 <title>NAMARI — 方言ボイス・ジェネレーター</title>
 <meta name="description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など20の方言と、あなた自身の声で読み上げるブラウザ完結型ツール。Gemini API を使用。">
 <link rel="canonical" href="https://4n5ai.github.io/NAMARI/">
@@ -128,8 +128,6 @@ a { color: var(--link); }
 .nowrap { white-space: nowrap; }
 .hero-title { margin: 0; font-size: clamp(28px, 6.4vw, 46px); line-height: 1.22; font-weight: 800; letter-spacing: -0.01em; }
 .lead { margin: 12px 0 0; color: var(--muted); font-size: 15px; }
-.install-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 14px; }
-.install-row .hint { margin: 0; }
 .install-btn { font-weight: 700; border-color: var(--g1); color: var(--text); background: color-mix(in srgb, var(--g1) 10%, transparent); }
 .install-btn:hover { border-color: var(--g2); }
 .hero-wave { display: flex; align-items: center; gap: 3px; height: 56px; margin: 22px 0 6px; overflow: hidden; }
@@ -351,10 +349,6 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
       <p class="eyebrow">DIALECT VOICE STUDIO</p>
       <h1 id="heroTitle" class="hero-title">その言葉を、<span class="nowrap"><span class="grad">お好みの方言</span>で。</span></h1>
       <p class="lead">標準語で書いて、方言と声を選ぶだけ。20の方言と、あなた自身の声で読み上げます。</p>
-      <div id="installRow" class="install-row" hidden>
-        <button id="btnInstall" type="button" class="install-btn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>アプリとして入れる</button>
-        <span class="hint">ホーム画面やデスクトップから、アプリのように使えます</span>
-      </div>
       <p id="netNote" class="note" aria-live="polite"></p>
       <div id="heroWave" class="hero-wave" aria-hidden="true"></div>
       <p id="linkNote" class="note" aria-live="polite"></p>
@@ -592,6 +586,13 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
         <code id="referrerExample" class="block"></code>
       </div>
 
+      <div class="voices-box install-box">
+        <strong>アプリとして入れる</strong>
+        <p class="muted small">ホーム画面やデスクトップに入れて、アプリのように使えます。オフラインでも、履歴の再生・保存と動画の書き出しが使えます。</p>
+        <div class="row"><button id="btnInstall" type="button" class="small install-btn" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>アプリとして入れる</button><span id="installHelpState" class="small muted"></span></div>
+        <p id="installDone" class="note" aria-live="polite"></p>
+      </div>
+
       <div class="voices-box">
         <strong>作成した方言の声</strong>
         <p class="muted small">方言×声の組み合わせごとに、初回だけ Voice design で声を作り、このブラウザに記録しています（Google 側に1年間保存・1プロジェクト200件まで）。</p>
@@ -640,12 +641,11 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
       <h3>アプリとして使う（PWA）</h3>
       <p>NAMARI は、ホーム画面やデスクトップに入れて、アプリのように使えます。</p>
       <ul class="bullets">
-        <li><strong>Chrome・Edge（PC・Android）</strong>：画面上部の「アプリとして入れる」、またはアドレスバーのインストールのアイコン</li>
+        <li><strong>Chrome・Edge（PC・Android）</strong>：「設定」タブの「アプリとして入れる」、またはアドレスバーのインストールのアイコン</li>
         <li><strong>iPhone・iPad</strong>：共有ボタン →「ホーム画面に追加」</li>
         <li><strong>Mac の Safari</strong>：「ファイル」→「Dockに追加」</li>
       </ul>
-      <div class="row"><button id="btnInstall2" type="button" class="small" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>アプリとして入れる</button><span id="installHelpState" class="small muted"></span></div>
-      <p id="installDone" class="note" aria-live="polite"></p>
+      <p>「設定」タブの「アプリとして入れる」からも入れられます。</p>
       <p class="hint">オフラインでも、履歴の再生・保存、動画の書き出し、この使い方は使えます。変換と読み上げは Gemini API を使うので、ネット接続が必要です。iPhone・iPad のホーム画面のアプリは Safari と保存場所が別なので、アプリ側で APIキーをもう一度入力してください。</p>
       <h3>困ったとき</h3>
       <dl class="faq">
@@ -4157,6 +4157,7 @@ async function encode(scene, vc, ac, size, { onProgress, signal }) {
 /*! NAMARI | MIT License | (c) 2026 4n5-Studio */
 /* ============================================================
    NAMARI — PWA: service worker registration, 「アプリとして入れる」 button
+   (in the settings dialog, 設定 tab)
    - Chrome / Edge / Android: the browser's own install prompt (beforeinstallprompt)
    - iPhone / iPad, Mac Safari: step-by-step instructions (no prompt API there)
    - hidden when already running as an app or when the browser cannot install
@@ -4191,15 +4192,11 @@ const GUIDES = {
 };
 
 let deferred = null;                                           // the saved beforeinstallprompt event
-const buttons = () => [$('btnInstall'), $('btnInstall2')].filter(Boolean);
 function refresh() {
   const can = !standalone() && (!!deferred || isIOS || isMacSafari);
-  $('installRow').hidden = !can;
-  for (const b of buttons()) b.hidden = !can;
-  if ($('installHelpState')) {
-    $('installHelpState').textContent = standalone() ? 'いまはアプリとして開いています。'
-      : can ? '' : 'このブラウザでは、画面からは入れられません。Chrome・Edge・Safari で開いてください。';
-  }
+  $('btnInstall').hidden = !can;
+  $('installHelpState').textContent = standalone() ? 'いまはアプリとして開いています。'
+    : can ? '' : 'インストール済みか、このブラウザではここから入れられません。Chrome・Edge・Safari で開くか、ブラウザのメニューから入れてください。';
 }
 function showGuide(kind) {
   const g = GUIDES[kind];
@@ -4225,14 +4222,14 @@ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferr
 window.addEventListener('appinstalled', () => {
   deferred = null;
   refresh();
-  const n = $('installDone');
-  if (n) { n.textContent = 'インストールしました。ホーム画面・デスクトップ・アプリ一覧から開けます。'; n.className = 'note ok'; }
+  $('installDone').textContent = 'インストールしました。ホーム画面・デスクトップ・アプリ一覧から開けます。';
+  $('installDone').className = 'note ok';
 });
 if (window.matchMedia) {
   const mq = matchMedia('(display-mode: standalone)');
   if (mq.addEventListener) mq.addEventListener('change', refresh);
 }
-for (const b of buttons()) b.addEventListener('click', install);
+$('btnInstall').addEventListener('click', install);
 $('btnInstallClose').addEventListener('click', () => $('dlgInstall').close());
 
 /* ---------- online / offline ---------- */

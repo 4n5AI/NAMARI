@@ -9,7 +9,7 @@
      is not touched: API traffic never goes through this cache
    ============================================================ */
 'use strict';
-const CACHE = 'namari-0.7.0-ad1bf42e4a';
+const CACHE = 'namari-0.7.0-de2ab52ecf';
 const ASSETS = ["./", "manifest.webmanifest", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png"];                 // relative to this file; './' is the app page
 const scope = new URL(self.registration.scope);
 const isAppPage = url => url.pathname === scope.pathname || url.pathname === scope.pathname + 'index.html';

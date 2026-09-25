@@ -15,10 +15,6 @@
       <p class="eyebrow">DIALECT VOICE STUDIO</p>
       <h1 id="heroTitle" class="hero-title">その言葉を、<span class="nowrap"><span class="grad">お好みの方言</span>で。</span></h1>
       <p class="lead">標準語で書いて、方言と声を選ぶだけ。20の方言と、あなた自身の声で読み上げます。</p>
-      <div id="installRow" class="install-row" hidden>
-        <button id="btnInstall" type="button" class="install-btn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>アプリとして入れる</button>
-        <span class="hint">ホーム画面やデスクトップから、アプリのように使えます</span>
-      </div>
       <p id="netNote" class="note" aria-live="polite"></p>
       <div id="heroWave" class="hero-wave" aria-hidden="true"></div>
       <p id="linkNote" class="note" aria-live="polite"></p>
@@ -256,6 +252,13 @@
         <code id="referrerExample" class="block"></code>
       </div>
 
+      <div class="voices-box install-box">
+        <strong>アプリとして入れる</strong>
+        <p class="muted small">ホーム画面やデスクトップに入れて、アプリのように使えます。オフラインでも、履歴の再生・保存と動画の書き出しが使えます。</p>
+        <div class="row"><button id="btnInstall" type="button" class="small install-btn" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>アプリとして入れる</button><span id="installHelpState" class="small muted"></span></div>
+        <p id="installDone" class="note" aria-live="polite"></p>
+      </div>
+
       <div class="voices-box">
         <strong>作成した方言の声</strong>
         <p class="muted small">方言×声の組み合わせごとに、初回だけ Voice design で声を作り、このブラウザに記録しています（Google 側に1年間保存・1プロジェクト200件まで）。</p>
@@ -304,12 +307,11 @@
       <h3>アプリとして使う（PWA）</h3>
       <p>NAMARI は、ホーム画面やデスクトップに入れて、アプリのように使えます。</p>
       <ul class="bullets">
-        <li><strong>Chrome・Edge（PC・Android）</strong>：画面上部の「アプリとして入れる」、またはアドレスバーのインストールのアイコン</li>
+        <li><strong>Chrome・Edge（PC・Android）</strong>：「設定」タブの「アプリとして入れる」、またはアドレスバーのインストールのアイコン</li>
         <li><strong>iPhone・iPad</strong>：共有ボタン →「ホーム画面に追加」</li>
         <li><strong>Mac の Safari</strong>：「ファイル」→「Dockに追加」</li>
       </ul>
-      <div class="row"><button id="btnInstall2" type="button" class="small" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>アプリとして入れる</button><span id="installHelpState" class="small muted"></span></div>
-      <p id="installDone" class="note" aria-live="polite"></p>
+      <p>「設定」タブの「アプリとして入れる」からも入れられます。</p>
       <p class="hint">オフラインでも、履歴の再生・保存、動画の書き出し、この使い方は使えます。変換と読み上げは Gemini API を使うので、ネット接続が必要です。iPhone・iPad のホーム画面のアプリは Safari と保存場所が別なので、アプリ側で APIキーをもう一度入力してください。</p>
       <h3>困ったとき</h3>
       <dl class="faq">

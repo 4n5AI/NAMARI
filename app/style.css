@@ -99,8 +99,6 @@ a { color: var(--link); }
 .nowrap { white-space: nowrap; }
 .hero-title { margin: 0; font-size: clamp(28px, 6.4vw, 46px); line-height: 1.22; font-weight: 800; letter-spacing: -0.01em; }
 .lead { margin: 12px 0 0; color: var(--muted); font-size: 15px; }
-.install-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 14px; }
-.install-row .hint { margin: 0; }
 .install-btn { font-weight: 700; border-color: var(--g1); color: var(--text); background: color-mix(in srgb, var(--g1) 10%, transparent); }
 .install-btn:hover { border-color: var(--g2); }
 .hero-wave { display: flex; align-items: center; gap: 3px; height: 56px; margin: 22px 0 6px; overflow: hidden; }

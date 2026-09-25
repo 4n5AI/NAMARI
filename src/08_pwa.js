@@ -1,6 +1,7 @@
 /*! NAMARI | MIT License | (c) 2026 4n5-Studio */
 /* ============================================================
    NAMARI — PWA: service worker registration, 「アプリとして入れる」 button
+   (in the settings dialog, 設定 tab)
    - Chrome / Edge / Android: the browser's own install prompt (beforeinstallprompt)
    - iPhone / iPad, Mac Safari: step-by-step instructions (no prompt API there)
    - hidden when already running as an app or when the browser cannot install
@@ -35,15 +36,11 @@ const GUIDES = {
 };
 
 let deferred = null;                                           // the saved beforeinstallprompt event
-const buttons = () => [$('btnInstall'), $('btnInstall2')].filter(Boolean);
 function refresh() {
   const can = !standalone() && (!!deferred || isIOS || isMacSafari);
-  $('installRow').hidden = !can;
-  for (const b of buttons()) b.hidden = !can;
-  if ($('installHelpState')) {
-    $('installHelpState').textContent = standalone() ? 'いまはアプリとして開いています。'
-      : can ? '' : 'このブラウザでは、画面からは入れられません。Chrome・Edge・Safari で開いてください。';
-  }
+  $('btnInstall').hidden = !can;
+  $('installHelpState').textContent = standalone() ? 'いまはアプリとして開いています。'
+    : can ? '' : 'インストール済みか、このブラウザではここから入れられません。Chrome・Edge・Safari で開くか、ブラウザのメニューから入れてください。';
 }
 function showGuide(kind) {
   const g = GUIDES[kind];
@@ -69,14 +66,14 @@ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferr
 window.addEventListener('appinstalled', () => {
   deferred = null;
   refresh();
-  const n = $('installDone');
-  if (n) { n.textContent = 'インストールしました。ホーム画面・デスクトップ・アプリ一覧から開けます。'; n.className = 'note ok'; }
+  $('installDone').textContent = 'インストールしました。ホーム画面・デスクトップ・アプリ一覧から開けます。';
+  $('installDone').className = 'note ok';
 });
 if (window.matchMedia) {
   const mq = matchMedia('(display-mode: standalone)');
   if (mq.addEventListener) mq.addEventListener('change', refresh);
 }
-for (const b of buttons()) b.addEventListener('click', install);
+$('btnInstall').addEventListener('click', install);
 $('btnInstallClose').addEventListener('click', () => $('dlgInstall').close());
 
 /* ---------- online / offline ---------- */
