@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "namari",
   "display_name": "NAMARI 方言ボイス",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "標準語の文章を20の方言に書き換えて、方言の声で読み上げ、WAVで保存します（Gemini API）。",
   "long_description": "NAMARI は、日本語の文章を北海道弁から鹿児島弁、ウチナーヤマトグチまで20の方言に書き換え、その土地の話し方をする声で読み上げる MCP サーバーです。音声は Gemini API（gemini-3.8-flash-tts）で生成し、WAV ファイルとしてこのPCに保存します。\n\n- 方言の声は、方言と声の組み合わせごとに初回だけ Voice design で作成し、再利用します\n- NAMARI のWebアプリで登録した「自分の声」でも読み上げられます\n- 送信先は Gemini API（generativelanguage.googleapis.com）だけです。APIキーはこのPCの Claude の設定に保存されます\n\nWebアプリ: https://4n5ai.github.io/NAMARI/",
   "author": {

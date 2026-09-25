@@ -1,0 +1,39 @@
+{
+  "name": "NAMARI — 方言ボイス・ジェネレーター",
+  "short_name": "NAMARI",
+  "description": "標準語で書いた文章を、大阪弁・博多弁・津軽弁など20の方言と、あなた自身の声で読み上げるブラウザ完結型ツール。Gemini API を使用。",
+  "lang": "ja",
+  "dir": "ltr",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0b10",
+  "theme_color": "#0a0b10",
+  "categories": [
+    "entertainment",
+    "productivity",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
