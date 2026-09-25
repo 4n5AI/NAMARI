@@ -15,8 +15,9 @@ TITLE = 'NAMARI — 方言読み上げツール'
 DESCRIPTION = '標準語で書いた文章を、大阪弁・博多弁・津軽弁など日本各地の方言で読み上げるブラウザ完結型ツール。Gemini API を使用。'
 API_ORIGIN = 'https://generativelanguage.googleapis.com'
 BANNER = f'NAMARI v{VERSION} | MIT License | (c) 2026 4n5-Studio | https://github.com/4n5AI/NAMARI'
-FAVICON = ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='#c23b17'/>"
-           "<text x='32' y='46' font-size='40' text-anchor='middle' fill='#fff' font-family='serif'>訛</text></svg>")
+FAVICON = ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='#9ee6c8'/>"
+           "<circle cx='13' cy='14' r='3' fill='#4a2c20'/><circle cx='52' cy='50' r='2.6' fill='#4a2c20'/><circle cx='50' cy='13' r='2' fill='#4a2c20'/>"
+           "<text x='32' y='45' font-size='36' font-weight='700' text-anchor='middle' fill='#4a2c20' font-family='serif'>訛</text></svg>")
 
 sources = sorted(glob.glob('src/*.js'))
 script = '\n' + '\n'.join(read(f) for f in sources).replace('@VERSION@', VERSION) + '\n'
@@ -38,7 +39,7 @@ csp = '; '.join([
     "form-action 'none'",
     "object-src 'none'",
 ])
-favicon = 'data:image/svg+xml,' + urllib.parse.quote(FAVICON, safe=":/='#, ")
+favicon = 'data:image/svg+xml,' + urllib.parse.quote(FAVICON, safe=":/=', ")
 
 html = f'''<!doctype html>
 <!--! {BANNER} -->
@@ -59,8 +60,8 @@ html = f'''<!doctype html>
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="{TITLE}">
 <meta name="twitter:description" content="{DESCRIPTION}">
-<meta name="theme-color" content="#f8f5ef" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14120f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#4a2c20" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#120c09" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="{favicon}">
 <style>{style}</style>
 </head>

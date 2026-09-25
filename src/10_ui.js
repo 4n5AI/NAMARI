@@ -1,6 +1,7 @@
 /*! NAMARI | MIT License | (c) 2026 4n5-Studio */
 /* ============================================================
-   NAMARI — UI: 1) text  2) dialect + conversion  3) voice + TTS
+   NAMARI — UI: 1) text  2) dialect + conversion  3) voice + TTS,
+   player + waveform, history
    User input and API output are only ever written with textContent.
    ============================================================ */
 (() => {
@@ -29,6 +30,7 @@ const S = {
   memKey: '',             // fallback when the browser refuses storage
   busy: false,
   audioUrl: null,
+  currentId: null,       // history id shown in the player
   lastArea: 'srcText',    // tag buttons insert into the textarea used last
 };
 S.region = N.dialect(S.dialect).region;
@@ -102,6 +104,8 @@ function renderRegions() {
     b.addEventListener('click', () => { S.region = r; renderRegions(); renderCards(); });
     box.append(b);
   }
+  const sel = box.querySelector('[aria-selected=true]');           // keep the open tab visible on narrow screens
+  if (sel) box.scrollLeft = Math.max(0, sel.offsetLeft - (box.clientWidth - sel.offsetWidth) / 2);
 }
 function renderCards() {
   const box = $('dialectCards');
@@ -233,26 +237,110 @@ async function generate() {
     key, dialect: d, preset, model, text, style: emo.style,
     onRetry: onRetry('genNote'), onStage: st => note('genNote', STAGE[st](d, preset)),
   });
-  showResult(r, { d, preset, model, conv });
-}
-function showResult(r, { d, preset, model, conv }) {
-  if (S.audioUrl) URL.revokeObjectURL(S.audioUrl);
-  S.audioUrl = URL.createObjectURL(new Blob([r.bytes], { type: 'audio/wav' }));
   const dur = (r.info && r.info.duration) || 0;
-  const cost = usd(model, r.usage, Math.round(dur * N.AUDIO_TOKENS_PER_SEC)) + (conv ? usd(N.TEXT_MODEL, conv.usage) : 0);
-  $('player').src = S.audioUrl;
-  $('btnDownload').href = S.audioUrl;
-  $('btnDownload').download = `namari-${d.id}-${N.stamp()}.wav`;
-  $('resultMeta').textContent = `${d.name} · ${N.fmtSec(dur)} · ${N.fmtBytes(r.bytes.length)}` + (cost ? ` · 約 $${cost.toFixed(4)}` : '');
-  $('result').hidden = false;
+  const item = {
+    created: Date.now(), dialectId: d.id, dialectName: d.name,
+    voiceLabel: r.designed ? preset.label : `既定の声 ${r.voice}`, emotionLabel: emo.id === 'none' ? '' : emo.label,
+    model, text, duration: dur, bytes: r.bytes,
+    cost: usd(model, r.usage, Math.round(dur * N.AUDIO_TOKENS_PER_SEC)) + (conv ? usd(N.TEXT_MODEL, conv.usage) : 0),
+  };
+  showAudio(item);
   if (!r.designed) {
     const why = r.voiceError && r.voiceError.message ? `\n（理由: ${r.voiceError.message}）` : '';
     note('genNote', `${d.name}の声を用意できなかったため、既定の声（${r.voice}）で読み上げました。なまりが弱くなることがあります。${why}`, 'warn');
   } else {
     note('genNote', r.voiceCreated ? `できました。${d.name}の声（${preset.label}）を新しく作りました。次回からはすぐに使えます。` : 'できました。', 'ok');
   }
-  $('player').play().catch(() => { /* autoplay may be blocked: the controls are there */ });
+  saveHistory(item);
 }
+
+/* ---------------- result: player + waveform + download ---------------- */
+const wave = new N.Waveform($('wave'), $('player'));
+const fileName = item => `namari-${item.dialectId}-${N.stamp(new Date(item.created))}.wav`;
+const itemTitle = item => [item.dialectName, item.voiceLabel, item.emotionLabel].filter(Boolean).join(' · ');
+function showAudio(item, { autoplay = true } = {}) {
+  if (S.audioUrl) URL.revokeObjectURL(S.audioUrl);
+  S.audioUrl = URL.createObjectURL(new Blob([item.bytes], { type: 'audio/wav' }));
+  S.currentId = item.id || null;
+  $('player').src = S.audioUrl;
+  $('btnDownload').href = S.audioUrl;
+  $('btnDownload').download = fileName(item);
+  $('resultTitle').textContent = itemTitle(item);
+  $('resultMeta').textContent = [N.fmtSec(item.duration || 0), N.fmtBytes(item.bytes.length), item.cost ? `約 $${item.cost.toFixed(4)}` : ''].filter(Boolean).join(' · ');
+  $('result').hidden = false;
+  wave.set(item.bytes);
+  markPlaying();
+  if (autoplay) $('player').play().catch(() => { /* autoplay may be blocked: the controls are there */ });
+}
+
+/* ---------------- history (IndexedDB) ---------------- */
+function fmtWhen(ts) {
+  const d = new Date(ts), p = n => String(n).padStart(2, '0');
+  return `${d.getMonth() + 1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function markPlaying() {
+  for (const li of $('histList').children) li.classList.toggle('playing', S.currentId != null && li.dataset.id === String(S.currentId));
+}
+async function saveHistory(item) {
+  if (!N.history.available) return;
+  try {
+    item.id = await N.history.add(item);
+    S.currentId = item.id;
+    await renderHistory();
+  } catch (err) {
+    note('histNote', '履歴に保存できませんでした（ブラウザの保存容量やプライベートモードの制限の可能性があります）。', 'warn');
+  }
+}
+function downloadItem(item) {
+  const url = URL.createObjectURL(new Blob([item.bytes], { type: 'audio/wav' }));
+  const a = el('a', { href: url, download: fileName(item) });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+async function renderHistory() {
+  const list = $('histList');
+  if (!N.history.available) {
+    list.textContent = '';
+    $('histEmpty').textContent = 'このブラウザでは履歴を保存できません。';
+    $('btnHistClear').hidden = true;
+    return;
+  }
+  let items = [];
+  try { items = await N.history.list(); } catch (err) {
+    $('histEmpty').textContent = '履歴を読み込めませんでした（プライベートモードなどでは保存できません）。';
+  }
+  list.textContent = '';
+  for (const item of items) {
+    const li = el('li', { class: 'hist-item', 'data-id': String(item.id) });
+    const main = el('div', { class: 'hist-main' },
+      el('span', { class: 'hist-title' }, itemTitle(item)),
+      el('span', { class: 'hist-meta' }, `${fmtWhen(item.created)} · ${N.fmtSec(item.duration || 0)}`),
+      el('span', { class: 'hist-text' }, item.text || ''));
+    const acts = el('div', { class: 'hist-actions' });
+    const btn = (label, cls, fn, aria) => { const b = el('button', { type: 'button', class: cls, 'aria-label': `${aria}：${itemTitle(item)} ${fmtWhen(item.created)}` }, label); b.addEventListener('click', fn); acts.append(b); };
+    btn('再生', 'small', () => { showAudio(item); $('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, '再生');
+    btn('保存', 'small ghost', () => downloadItem(item), 'WAVを保存');
+    btn('削除', 'small ghost', async () => {
+      try { await N.history.del(item.id); } catch (err) { note('histNote', '削除できませんでした。', 'ng'); }
+      if (S.currentId === item.id) S.currentId = null;
+      renderHistory();
+    }, '削除');
+    li.append(main, acts);
+    list.append(li);
+  }
+  $('histCount').textContent = items.length ? `${items.length} / ${N.HISTORY_MAX}件` : '';
+  $('histEmpty').hidden = items.length > 0;
+  $('btnHistClear').hidden = !items.length;
+  markPlaying();
+}
+$('btnHistClear').addEventListener('click', async () => {
+  if (!confirm('履歴をすべて削除します。よろしいですか？（Google 側の声は削除されません）')) return;
+  try { await N.history.clear(); note('histNote', '履歴をすべて削除しました。', 'ok'); } catch (err) { note('histNote', '削除できませんでした。', 'ng'); }
+  S.currentId = null;
+  renderHistory();
+});
 $('btnGenerate').addEventListener('click', async () => {
   if (S.busy) return;
   setBusy(true, '生成中…');
@@ -355,5 +443,6 @@ updateAutoVoiceLabel();
 updatePriceNote();
 updateCount();
 updateBadge();
+renderHistory();
 if (!getKey()) openSettings();
 })();

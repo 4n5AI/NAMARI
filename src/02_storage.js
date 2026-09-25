@@ -1,7 +1,7 @@
 /*! NAMARI | MIT License | (c) 2026 4n5-Studio */
 /* ============================================================
    NAMARI — storage: API key (local / session), designed-voice cache,
-   preferences. Every access is wrapped: private windows and blocked
+   preferences, history (IndexedDB). Every access is wrapped: private windows and blocked
    site data must not break the page.
    ============================================================ */
 (() => {
@@ -44,5 +44,54 @@ N.voiceCache = {
 N.prefs = {
   get() { return readJson(PREFS_NAME, {}); },
   set(patch) { write('local', PREFS_NAME, JSON.stringify(Object.assign(this.get(), patch))); },
+};
+
+/* ---------------- history: IndexedDB, newest N.HISTORY_MAX entries ----------------
+   entry: {id, created, dialectId, dialectName, voiceLabel, emotionLabel, model, text, duration, cost, bytes (Uint8Array WAV)} */
+N.HISTORY_MAX = 20;
+const DB_NAME = 'namari', DB_VERSION = 1, STORE = 'history';
+let dbPromise = null;
+const openDb = () => dbPromise || (dbPromise = new Promise((resolve, reject) => {
+  let req;
+  try { req = window.indexedDB.open(DB_NAME, DB_VERSION); } catch (e) { reject(e); return; }
+  req.onupgradeneeded = () => {
+    const db = req.result;
+    if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+  };
+  req.onsuccess = () => resolve(req.result);
+  req.onerror = () => reject(req.error || new Error('IndexedDB open failed'));
+  req.onblocked = () => reject(new Error('IndexedDB blocked'));
+}).catch(err => { dbPromise = null; throw err; }));
+
+/* run fn(store) in one transaction; resolves with whatever fn stored in box.value once it commits */
+const run = (mode, fn) => openDb().then(db => new Promise((resolve, reject) => {
+  const t = db.transaction(STORE, mode);
+  const box = {};
+  fn(t.objectStore(STORE), box);
+  t.oncomplete = () => resolve(box.value);
+  t.onerror = () => reject(t.error);
+  t.onabort = () => reject(t.error || new Error('IndexedDB transaction aborted'));
+}));
+
+N.history = {
+  available: (() => { try { return !!window.indexedDB; } catch (e) { return false; } })(),
+  /* add, then drop the oldest beyond the limit — in the same transaction */
+  add(entry) {
+    return run('readwrite', (st, box) => {
+      st.add(entry).onsuccess = e => {
+        box.value = e.target.result;
+        st.getAllKeys().onsuccess = ev => {
+          const keys = ev.target.result;                 // ascending = oldest first
+          for (const k of keys.slice(0, Math.max(0, keys.length - N.HISTORY_MAX))) st.delete(k);
+        };
+      };
+    });
+  },
+  list() {
+    return run('readonly', (st, box) => { st.getAll().onsuccess = e => { box.value = e.target.result.sort((a, b) => b.id - a.id); }; });
+  },
+  get(id) { return run('readonly', (st, box) => { st.get(id).onsuccess = e => { box.value = e.target.result || null; }; }); },
+  del(id) { return run('readwrite', st => { st.delete(id); }); },
+  clear() { return run('readwrite', st => { st.clear(); }); },
 };
 })();
