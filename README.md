@@ -19,6 +19,7 @@
 - **サーバーなし:** ブラウザから Gemini API を直接呼び出します
 - **APIキーはブラウザにだけ保存:** localStorage／sessionStorage を選べます。送信先は Gemini API だけです
 - **静的サイト:** `index.html` 1枚（読み込む外部ファイルなし。mp4-muxer も埋め込み済み）。CSP は meta タグで設定しています
+- **AI から使える:** ローカル MCP サーバー（Claude など）と、入力済みで開くリンク（どのAIでも）
 
 ### 対応している方言（20方言＋標準語）
 
@@ -50,6 +51,25 @@
 - **波形表示:** 生成した音声の波形を Canvas で表示します。クリックや左右キーで再生位置を移動できます
 - **履歴:** 生成した音声を、このブラウザ（IndexedDB）に最新20件まで保存します。再生・再ダウンロード・削除ができます
 - **デザイン:** 声の信号をイメージした、紫から水色へのグラデーションを使っています。ライト／ダークモードに対応しています
+
+## AI から使う（MCP・リンク）
+
+- **MCP（Claude デスクトップ版・Claude Code など）:** AI に「この文を博多弁で読み上げて」と頼むと、方言の音声（WAV）を自分のPCに保存します。
+  Claude デスクトップ版は [namari.mcpb](https://4n5ai.github.io/NAMARI/mcp/namari.mcpb) を開くだけで入ります。詳しくは [mcp/README.md](mcp/README.md) を見てください
+- **リンク（どのAIでも）:** `https://4n5ai.github.io/NAMARI/#text=…&dialect=osaka` の形のリンクを開くと、入力済みの状態で NAMARI が開きます（自動では生成しません）。
+  値は `#` より後ろ（URL のフラグメント）に入れるので、サーバーには送られません
+
+| リンクのパラメーター | 内容 |
+|---|---|
+| `text` | 標準語の文章（ステップ01） |
+| `dialect_text` | 方言の文章（ステップ02。AI が書き換えた文を渡すとき） |
+| `dialect` | 方言の ID か名前（`osaka`・`大阪弁` など） |
+| `strength` | `weak` / `mid` / `strong` |
+| `voice` | `auto` / `f-young` / `f-old` / `m-young` / `m-old` / 自分の声の ID |
+| `emotion` | `cheerful` / `energetic` / `calm` / `slow` / `whisper` / `sad` |
+| `model` | `flash` / `lite` |
+
+画面上部の「設定」→「AI連携」タブに、導入手順と、AI に渡す指示文（コピー用）があります。
 
 ## 使い方
 
@@ -89,7 +109,7 @@ python3 -m http.server 8000
 
 ```
 index.html              ← build.py の出力（GitHub Pages で公開するファイル）
-build.py                ← vendor/ と src/*.js と app/ を結合し、CSP のハッシュを埋め込む
+build.py                ← index.html と mcp/namari.mcpb を作る（CSP のハッシュも埋め込む）
 VERSION
 app/body.html           ← 画面の HTML
 app/style.css           ← スタイル（ライト／ダーク）
@@ -103,6 +123,9 @@ src/07_video.js         ← 縦型動画：字幕のタイミング、描画、�
 vendor/mp4-muxer.js     ← MP4 の書き出し（mp4-muxer 5.2.2、MIT License）
 src/10_ui.js            ← 画面の動作
 dev/test.html           ← API疎通テスト
+mcp/server/index.js     ← ローカル MCP サーバー（依存なし・Node.js 18+）
+mcp/manifest.json       ← Claude デスクトップ版向けパッケージ（.mcpb）の定義
+mcp/namari.mcpb         ← build.py の出力（Claude デスクトップ版にそのまま入れられる）
 ```
 
 ## 開発フェーズ
@@ -112,6 +135,7 @@ dev/test.html           ← API疎通テスト
 - [x] フェーズ3：全方言、履歴（IndexedDB）、波形表示
 - [x] 追加：自分の声（Voice replication）、デザイン刷新
 - [x] フェーズ4：字幕付き縦型MP4の書き出し
+- [x] 追加：AI 連携（ローカル MCP サーバー・入力済みリンク）、設定画面のタブ（設定／使い方／AI連携）
 
 ## License
 

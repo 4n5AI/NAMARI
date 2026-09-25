@@ -1,10 +1,10 @@
 <!doctype html>
-<!--! NAMARI v0.5.0 | MIT License | (c) 2026 4n5-Studio | https://github.com/4n5AI/NAMARI -->
+<!--! NAMARI v0.6.0 | MIT License | (c) 2026 4n5-Studio | https://github.com/4n5AI/NAMARI -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2MgYNG8lJZy5p1vNyVk7iouPtUUVN3s5Y9fPb4AWXMM=' 'sha256-2SIjWFxhkXhat/AEzkIQ0SvjFgsm3I2f70RtM5JO/Co='; style-src 'sha256-QOMUPV50FYWM8EnLX6QPU2cad0js8He+KIdCzrGC8Fw='; connect-src https://generativelanguage.googleapis.com; img-src data:; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2MgYNG8lJZy5p1vNyVk7iouPtUUVN3s5Y9fPb4AWXMM=' 'sha256-5EQptPFCqkqNXfziRmyKdbA2bcTf74n6dFlFXaSFhi4='; style-src 'sha256-ON3pR1pqTwwLp6swemzT64zLfeVDfyy6t+Bt6HEsg2E='; connect-src https://generativelanguage.googleapis.com; img-src data:; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
 <title>NAMARI — 方言ボイス・ジェネレーター</title>
 <meta name="description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など20の方言と、あなた自身の声で読み上げるブラウザ完結型ツール。Gemini API を使用。">
 <link rel="canonical" href="https://4n5ai.github.io/NAMARI/">
@@ -246,11 +246,34 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
 .price th, .price td { border-bottom: 1px solid var(--line); padding: 6px 4px; text-align: left; }
 .price td:not(:first-child), .price th:not(:first-child) { text-align: right; white-space: nowrap; font-family: var(--mono); }
 
+/* ---------- settings tabs ---------- */
+.dlg-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: -18px -20px 14px; padding: 14px 20px 12px; background: var(--panel); border-bottom: 1px solid var(--line); }
+.dlg-tabs button { padding: 6px 16px; font-weight: 600; }
+.dlg-tabs button[aria-selected=true] { background: var(--text); color: var(--bg); }
+.icon-btn { width: 34px; height: 34px; padding: 0; font-size: 20px; line-height: 1; border-color: var(--line); }
+.tab-panel:focus-visible { outline: none; }
+.steps { margin: 6px 0; padding-left: 1.4em; font-size: 14px; }
+.steps li { margin: 5px 0; }
+.bullets { margin: 6px 0; padding-left: 1.2em; font-size: 14px; }
+.bullets li { margin: 4px 0; }
+.faq { margin: 6px 0; font-size: 14px; }
+.faq dt { font-weight: 700; margin-top: 10px; }
+.faq dd { margin: 2px 0 0; color: var(--muted); }
+.ai-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 10px 0 4px; }
+.ai-card { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--raised); font-size: 14px; }
+.ai-card .sub { display: block; }
+.ai-card p { margin: 6px 0 0; }
+.code-block { position: relative; margin: 8px 0; }
+.code-block pre { margin: 0; padding: 12px 14px; padding-right: 84px; border-radius: 12px; background: var(--field); border: 1px solid var(--line); font: 12.5px/1.6 var(--mono); white-space: pre-wrap; word-break: break-all; }
+.code-block .copy-btn { position: absolute; top: 8px; right: 8px; background: var(--panel); }
+.tools td:first-child { white-space: nowrap; padding-right: 12px; }
+.tools td { text-align: left !important; font-family: var(--ui) !important; }
+
 /* ---------- my voice ---------- */
 .mv-steps { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 12px; }
 .mv-step { padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--raised); }
 .mv-step h3 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 4px; }
-.step-dot { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font: 700 11px/1 var(--mono); color: #fff; background: linear-gradient(135deg, var(--g1), var(--g2)); }
+.step-dot { flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font: 700 11px/1 var(--mono); color: #fff; background: linear-gradient(135deg, var(--g1), var(--g2)); }
 .script { margin: 10px 0; padding: 10px 14px; border-radius: 12px; background: var(--field); box-shadow: inset 3px 0 0 var(--g1); font-size: 15px; line-height: 1.9; }
 .script.consent { font-weight: 700; }
 .rec { margin-top: 10px; }
@@ -319,6 +342,7 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
       <h1 id="heroTitle" class="hero-title">その言葉を、<span class="nowrap"><span class="grad">あの町の声</span>で。</span></h1>
       <p class="lead">標準語で書いて、方言と声を選ぶだけ。20の方言と、あなた自身の声で読み上げます。</p>
       <div id="heroWave" class="hero-wave" aria-hidden="true"></div>
+      <p id="linkNote" class="note" aria-live="polite"></p>
     </section>
 
     <!-- ================= step 1 ================= -->
@@ -393,8 +417,10 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
 
   <footer class="foot">
     <p>
-      <span>NAMARI v0.5.0</span> ·
+      <span>NAMARI v0.6.0</span> ·
       <span>MIT License © 2026 4n5-Studio</span> ·
+      <button id="btnHelp" type="button" class="link" aria-haspopup="dialog">使い方</button> ·
+      <button id="btnAI" type="button" class="link" aria-haspopup="dialog">AI連携</button> ·
       <button id="btnTerms" type="button" class="link" aria-haspopup="dialog">利用について</button> ·
       <a href="https://github.com/4n5AI/NAMARI" target="_blank" rel="noopener noreferrer">GitHub</a>
     </p>
@@ -500,46 +526,163 @@ code.block { display: block; padding: 6px 9px; border-radius: 8px; background: v
 </dialog>
 
 <!-- ================= settings ================= -->
-<dialog id="dlgSettings" class="dlg" aria-labelledby="dlgSettingsTitle">
+<dialog id="dlgSettings" class="dlg dlg-wide" aria-label="設定と使い方">
   <div class="dlg-body">
-    <h2 id="dlgSettingsTitle">APIキーの設定</h2>
-    <p>NAMARI は、あなたの Gemini API キーでブラウザから直接 Gemini API を呼び出します。
-      キーは <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a> で取得できます。</p>
-
-    <div id="keyCurrent" class="key-current" hidden>
-      <span>保存中のキー: <code id="keyMasked"></code> <span id="keyWhere" class="muted small"></span></span>
-      <button id="btnKeyDelete" type="button" class="danger small">キーを削除</button>
+    <div class="dlg-head">
+      <div id="settingsTabs" class="seg dlg-tabs" role="tablist" aria-label="設定と使い方">
+        <button type="button" role="tab" id="tabKey" aria-controls="panelKey" aria-selected="true">設定</button>
+        <button type="button" role="tab" id="tabHelp" aria-controls="panelHelp" aria-selected="false" tabindex="-1">使い方</button>
+        <button type="button" role="tab" id="tabAI" aria-controls="panelAI" aria-selected="false" tabindex="-1">AI連携</button>
+      </div>
+      <button id="btnSettingsX" type="button" class="icon-btn" aria-label="閉じる">×</button>
     </div>
 
-    <label class="field-label" for="keyInput">APIキー</label>
-    <div class="row">
-      <input id="keyInput" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="AIza..." class="grow">
-      <button id="btnKeyShow" type="button" class="ghost">表示</button>
-    </div>
-    <fieldset class="radios">
-      <legend class="field-label">保存方法</legend>
-      <label><input type="radio" name="keyMode" value="local" checked> このブラウザに保存（localStorage）</label>
-      <label><input type="radio" name="keyMode" value="session"> このタブを閉じるまで（sessionStorage）</label>
-    </fieldset>
-    <p id="keyError" class="note ng" aria-live="polite"></p>
+    <!-- ---------- tab: settings ---------- -->
+    <section id="panelKey" class="tab-panel" role="tabpanel" aria-labelledby="tabKey">
+      <h2>APIキーの設定</h2>
+      <p>NAMARI は、あなたの Gemini API キーでブラウザから直接 Gemini API を呼び出します。
+        キーは <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a> で取得できます。</p>
 
-    <div class="callout">
-      <strong>おすすめ：キーに「HTTPリファラー制限」をかけてください</strong>
-      <p>Google Cloud コンソールの「認証情報」でキーを開き、「ウェブサイトの制限」に次を追加すると、このサイト以外からキーを使えなくなります。</p>
-      <code id="referrerExample" class="block"></code>
-    </div>
+      <div id="keyCurrent" class="key-current" hidden>
+        <span>保存中のキー: <code id="keyMasked"></code> <span id="keyWhere" class="muted small"></span></span>
+        <button id="btnKeyDelete" type="button" class="danger small">キーを削除</button>
+      </div>
 
-    <div class="voices-box">
-      <strong>作成した方言の声</strong>
-      <p class="muted small">方言×声の組み合わせごとに、初回だけ Voice design で声を作り、このブラウザに記録しています（Google 側に1年間保存・1プロジェクト200件まで）。</p>
-      <div class="row between"><span id="voiceCount" class="small"></span><button id="btnVoicesDelete" type="button" class="ghost small">作成した声をすべて削除</button></div>
-      <p id="voicesNote" class="note" aria-live="polite"></p>
-    </div>
+      <label class="field-label" for="keyInput">APIキー</label>
+      <div class="row">
+        <input id="keyInput" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="AIza..." class="grow">
+        <button id="btnKeyShow" type="button" class="ghost">表示</button>
+      </div>
+      <fieldset class="radios">
+        <legend class="field-label">保存方法</legend>
+        <label><input type="radio" name="keyMode" value="local" checked> このブラウザに保存（localStorage）</label>
+        <label><input type="radio" name="keyMode" value="session"> このタブを閉じるまで（sessionStorage）</label>
+      </fieldset>
+      <p id="keyError" class="note ng" aria-live="polite"></p>
 
-    <div class="dlg-actions">
-      <button id="btnSettingsClose" type="button" class="ghost">閉じる</button>
-      <button id="btnKeySave" type="button" class="primary">保存</button>
-    </div>
+      <div class="callout">
+        <strong>おすすめ：キーに「HTTPリファラー制限」をかけてください</strong>
+        <p>Google Cloud コンソールの「認証情報」でキーを開き、「ウェブサイトの制限」に次を追加すると、このサイト以外からキーを使えなくなります。</p>
+        <code id="referrerExample" class="block"></code>
+      </div>
+
+      <div class="voices-box">
+        <strong>作成した方言の声</strong>
+        <p class="muted small">方言×声の組み合わせごとに、初回だけ Voice design で声を作り、このブラウザに記録しています（Google 側に1年間保存・1プロジェクト200件まで）。</p>
+        <div class="row between"><span id="voiceCount" class="small"></span><button id="btnVoicesDelete" type="button" class="ghost small">作成した声をすべて削除</button></div>
+        <p id="voicesNote" class="note" aria-live="polite"></p>
+      </div>
+
+      <div class="dlg-actions">
+        <button id="btnSettingsClose" type="button" class="ghost">閉じる</button>
+        <button id="btnKeySave" type="button" class="primary">保存</button>
+      </div>
+  
+    </section>
+
+    <!-- ---------- tab: how to use ---------- -->
+    <section id="panelHelp" class="tab-panel" role="tabpanel" aria-labelledby="tabHelp" tabindex="0" hidden>
+      <h2>使い方</h2>
+      <h3>はじめに（最初の1回だけ）</h3>
+      <ol class="steps">
+        <li><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a> で Gemini API キーを取得します。</li>
+        <li>「設定」タブにキーを貼り付けて「保存」を押します。</li>
+        <li>おすすめ：Google Cloud コンソールで、キーに HTTPリファラー制限をかけます（「設定」タブに手順があります）。</li>
+      </ol>
+      <h3>基本の3ステップ</h3>
+      <ol class="steps">
+        <li><strong>01 テキスト</strong>：読み上げたい文章を標準語で書きます（1000文字まで）。笑い・ため息・間などは、下のボタンからタグで入れられます（「その他のタグ」で36種類）。</li>
+        <li><strong>02 方言</strong>：地方のタブから方言を選び、強さ（弱・中・強）を決めて「変換」を押します。変換後の文章は手で直せます。</li>
+        <li><strong>03 声</strong>：声（自動・女性／男性・若め／年配・自分の声）、感情、モデルを選んで「音声を生成」を押します。</li>
+      </ol>
+      <p class="hint">「変換」を押さずに「音声を生成」を押しても、自動で方言に変換してから読み上げます。</p>
+      <h3>できあがった音声</h3>
+      <ul class="bullets">
+        <li>波形をクリックすると、その位置から再生します。</li>
+        <li>「WAVをダウンロード」で保存できます。生成した音声は、このブラウザの「履歴」に最新20件まで残ります。</li>
+        <li>「縦型動画（MP4）」で、字幕付きの 9:16 動画を書き出せます（TikTok・リール・ショート向け）。</li>
+      </ul>
+      <h3>方言の声について</h3>
+      <p>方言と声の組み合わせごとに、初回だけ、その土地の話し方をする声を作ります（数十秒かかります）。2回目からはすぐに使えます。作った声は「設定」タブから削除できます。</p>
+      <h3>自分の声で読み上げる</h3>
+      <ol class="steps">
+        <li>ステップ03の「自分の声を登録・管理」を開きます。</li>
+        <li>例文を読んで10〜30秒録音し、続けて同意文を読み上げて録音します。</li>
+        <li>名前を付けて登録すると、「声」の欄で選べるようになります。</li>
+      </ol>
+      <p class="hint">登録できるのは、あなた自身の声だけです。</p>
+      <h3>困ったとき</h3>
+      <dl class="faq">
+        <dt>「APIキーが正しくありません」と出る</dt>
+        <dd>「設定」タブでキーを貼り直してください。リファラー制限をかけている場合は、このページのURLが許可されているかも確認してください。</dd>
+        <dt>「リクエストが多すぎます」と出る</dt>
+        <dd>無料枠の上限か、一時的な混雑です。少し待ってから試してください。</dd>
+        <dt>方言の声を作れなかった</dt>
+        <dd>その回は既定の声で読み上げます。時間をおいて、もう一度生成してください。</dd>
+        <dt>録音できない</dt>
+        <dd>アドレスバーの設定から、このサイトにマイクの使用を許可してください。</dd>
+        <dt>動画を書き出せない</dt>
+        <dd>Chrome・Edge・Safari の最新版で開き、サイズを「720×1280（軽量）」にして試してください。</dd>
+      </dl>
+      <div class="dlg-actions"><button type="button" class="ghost" data-close>閉じる</button></div>
+    </section>
+
+    <!-- ---------- tab: AI integration ---------- -->
+    <section id="panelAI" class="tab-panel" role="tabpanel" aria-labelledby="tabAI" tabindex="0" hidden>
+      <h2>AI連携</h2>
+      <p>ChatGPT や Claude などの AI から NAMARI を使う方法は2つあります。</p>
+      <div class="ai-cards">
+        <div class="ai-card"><span class="step-dot">A</span><div><strong>MCP</strong><span class="sub">Claude デスクトップ版・Claude Code など</span>
+          <p>AI に「この文を博多弁で読み上げて」と頼むだけで、方言の音声（WAV）があなたのPCに保存されます。</p></div></div>
+        <div class="ai-card"><span class="step-dot">B</span><div><strong>リンク</strong><span class="sub">ChatGPT・Claude・Gemini など、どのAIでも</span>
+          <p>AI に NAMARI のリンクを作ってもらい、開くと入力済みの状態になります。</p></div></div>
+      </div>
+
+      <h3>A. MCP：Claude デスクトップ版（おすすめ）</h3>
+      <ol class="steps">
+        <li><a id="mcpbLink" href="mcp/namari.mcpb" download>namari.mcpb をダウンロード</a>します。</li>
+        <li>ダウンロードしたファイルを開くと、Claude のインストール画面が出ます（Claude の「設定」→「拡張機能」にドラッグ＆ドロップしても入れられます）。</li>
+        <li>「Gemini API キー」と「保存先フォルダ」を入力して、有効にします。</li>
+        <li>チャットで頼みます。例：<code>「今日はとても暑いですね」を博多弁で読み上げて</code></li>
+      </ol>
+      <p class="hint">音声は、保存先フォルダの中の「NAMARI」フォルダに WAV で保存されます。APIキーは Claude の設定（このPC）に保存され、NAMARI のサーバーはありません。</p>
+
+      <h3>A. MCP：Claude Code・そのほかの MCP クライアント</h3>
+      <p>Node.js 18 以上が必要です。リポジトリを取得して、MCP サーバーとして登録します。</p>
+      <div class="code-block"><pre id="cmdClaudeCode">git clone https://github.com/4n5AI/NAMARI.git
+claude mcp add namari -s user -e GEMINI_API_KEY=あなたのキー -- node "$(pwd)/NAMARI/mcp/server/index.js"</pre><button type="button" class="small copy-btn" data-copy="cmdClaudeCode">コピー</button></div>
+      <p>設定ファイル（JSON）で登録するアプリの場合：</p>
+      <div class="code-block"><pre id="cfgJson">{
+  "mcpServers": {
+    "namari": {
+      "command": "node",
+      "args": ["/NAMARIを置いた場所/NAMARI/mcp/server/index.js"],
+      "env": { "GEMINI_API_KEY": "あなたのキー" }
+    }
+  }
+}</pre><button type="button" class="small copy-btn" data-copy="cfgJson">コピー</button></div>
+      <p class="hint">コマンドに書いたキーはシェルの履歴に残ります。気になる場合は、あとで履歴から消してください。</p>
+
+      <h3>MCP でできること</h3>
+      <table class="price tools">
+        <tbody>
+          <tr><td><code>speak</code></td><td>方言に変換して読み上げ、WAV を保存（自分の声・感情・モデルも指定できます）</td></tr>
+          <tr><td><code>convert_to_dialect</code></td><td>方言の文章だけを作る</td></tr>
+          <tr><td><code>list_dialects</code></td><td>方言・声・感情・タグの一覧</td></tr>
+          <tr><td><code>list_voices</code></td><td>自分の声（Google に保存したもの）の一覧</td></tr>
+          <tr><td><code>make_namari_link</code></td><td>NAMARI を入力済みで開くリンクを作る（字幕付き動画を作りたいときなど）</td></tr>
+        </tbody>
+      </table>
+      <p class="hint">MCP で自分の声を使うには、NAMARI の「自分の声を登録」で「Google に保存」を選んでください。</p>
+
+      <h3>B. リンクで連携（どのAIでも）</h3>
+      <p>次の指示文を AI に渡しておくと（ChatGPT のカスタム指示・プロジェクト、Claude のプロジェクトなど）、方言で読み上げたいときに NAMARI のリンクを出してくれます。</p>
+      <div class="code-block"><pre id="aiPrompt"></pre><button type="button" class="small copy-btn" data-copy="aiPrompt">コピー</button></div>
+      <p>いま画面に入力している内容のリンク：</p>
+      <div class="row"><input id="curLink" class="grow" readonly aria-label="いまの入力内容のリンク"><button type="button" class="small copy-btn" data-copy="curLink">コピー</button></div>
+      <p class="hint">リンクの内容（# より後ろ）は、サーバーには送られません。ただし、リンクを受け取った人には文章が見えます。リンクを開いただけでは生成せず、「音声を生成」を押したときに、開いた人の APIキーで生成します。</p>
+      <div class="dlg-actions"><button type="button" class="ghost" data-close>閉じる</button></div>
+    </section>
   </div>
 </dialog>
 
@@ -3229,6 +3372,32 @@ N.EMOTIONS = [
   { id: 'sad', label: 'しんみり', style: 'sad and quiet' },
 ];
 
+/* dialect from an id or a Japanese name: "osaka" / "大阪弁" / "大阪" / "沖縄" (a region with one dialect) */
+N.findDialect = query => {
+  const q = String(query || '').trim().toLowerCase();
+  if (!q) return null;
+  return N.DIALECTS.find(d => d.id === q)
+    || N.DIALECTS.find(d => d.name === q || d.name.replace(/弁$/, '') === q || d.name.split('（')[0] === q)
+    || N.DIALECTS.find(d => d.name.startsWith(q) || q.startsWith(d.name.replace(/弁$/, '')))
+    || ((list => (list.length === 1 ? list[0] : null))(N.DIALECTS.filter(d => d.region === q)));
+};
+
+/* ---------- links: open the app with the form filled in (used by AI chats and the MCP server) ----------
+   Everything travels in the URL fragment (#...), which browsers never send to the server. */
+N.APP_URL = 'https://4n5ai.github.io/NAMARI/';
+N.LINK_KEYS = ['text', 'dialect_text', 'dialect', 'strength', 'voice', 'emotion', 'model'];
+N.buildLink = (params, base = N.APP_URL) => {
+  const q = new URLSearchParams();
+  for (const k of N.LINK_KEYS) if (params && params[k] != null && String(params[k]).trim()) q.set(k, String(params[k]).trim());
+  return base.split('#')[0] + (q.toString() ? '#' + q : '');
+};
+N.parseLink = hash => {
+  const q = new URLSearchParams(String(hash || '').replace(/^#/, ''));
+  const out = {};
+  for (const k of N.LINK_KEYS) { const v = q.get(k); if (v && v.trim()) out[k] = v; }
+  return out;
+};
+
 /* inline tags (official Gemini 3.8 TTS vocal tags; they stay in English even inside Japanese text).
    quick: shown as buttons under the text box; the rest open from 「その他のタグ」 */
 N.TAG_GROUPS = [
@@ -4000,7 +4169,7 @@ function note(id, msg, kind = '', action = null) {
     p.append(b);
   }
 }
-const openSettingsAction = { label: '設定を開く', run: () => openSettings() };
+const openSettingsAction = { label: '設定を開く', run: () => openSettings('key') };
 function showError(id, err) {
   if (err && err.name === 'AbortError') return;
   if (err instanceof N.ApiError) {
@@ -4354,7 +4523,28 @@ function renderKeyState() {
   $('btnVoicesDelete').disabled = !n;
   updateBadge();
 }
-function openSettings() {
+/* settings dialog = three tabs: 設定 (key) / 使い方 (help) / AI連携 (ai) */
+const TABS = { key: ['tabKey', 'panelKey'], help: ['tabHelp', 'panelHelp'], ai: ['tabAI', 'panelAI'] };
+function showTab(name, focusTab) {
+  for (const [k, [tab, panel]] of Object.entries(TABS)) {
+    const on = k === name;
+    $(tab).setAttribute('aria-selected', String(on));
+    $(tab).tabIndex = on ? 0 : -1;
+    $(panel).hidden = !on;
+  }
+  if (name === 'ai') renderAiTab();
+  if (focusTab) $(TABS[name][0]).focus();
+  $('dlgSettings').scrollTop = 0;
+}
+for (const [k, [tab]] of Object.entries(TABS)) $(tab).addEventListener('click', () => showTab(k));
+$('settingsTabs').addEventListener('keydown', e => {                   // arrow keys move between tabs (WAI-ARIA tabs)
+  const keys = Object.keys(TABS), cur = keys.findIndex(k => $(TABS[k][0]).getAttribute('aria-selected') === 'true');
+  const to = { ArrowRight: cur + 1, ArrowLeft: cur - 1, Home: 0, End: keys.length - 1 }[e.key];
+  if (to === undefined) return;
+  e.preventDefault();
+  showTab(keys[(to + keys.length) % keys.length], true);
+});
+function openSettings(tab = 'key') {
   const dlg = $('dlgSettings');
   $('keyInput').value = '';
   $('keyInput').type = 'password';
@@ -4363,11 +4553,42 @@ function openSettings() {
   note('voicesNote', '');
   $('referrerExample').textContent = /\.github\.io$/.test(location.hostname) ? `${location.origin}/*` : 'https://<GitHubユーザー名>.github.io/*';
   renderKeyState();
+  showTab(tab);
   if (!dlg.open) dlg.showModal();
-  $('keyInput').focus();
+  if (tab === 'key') $('keyInput').focus(); else $(TABS[tab][0]).focus();
 }
-$('btnSettings').addEventListener('click', openSettings);
+$('btnSettings').addEventListener('click', () => openSettings('key'));
+$('btnHelp').addEventListener('click', () => openSettings('help'));
+$('btnAI').addEventListener('click', () => openSettings('ai'));
 $('btnSettingsClose').addEventListener('click', () => $('dlgSettings').close());
+$('btnSettingsX').addEventListener('click', () => $('dlgSettings').close());
+for (const b of document.querySelectorAll('#dlgSettings [data-close]')) b.addEventListener('click', () => $('dlgSettings').close());
+
+/* AI tab: the instruction text for chat AIs (built from the dialect data, so it never goes stale) and the current link */
+function renderAiTab() {
+  $('aiPrompt').textContent = [
+    '方言読み上げツール「NAMARI」のリンクを作ってください。',
+    '私が日本語の文章を方言で読み上げたいと言ったら、次の形式のリンクを作って渡してください（値は URL エンコードする）。',
+    `${N.APP_URL}#text=<標準語の文章>&dialect=<方言ID>&voice=<声>&emotion=<感情>`,
+    `- dialect（方言ID）: ${N.DIALECTS.map(d => `${d.id}=${d.name}`).join(', ')}`,
+    `- voice（省略可）: auto, ${N.VOICE_PRESETS.map(p => `${p.id}=${p.label}`).join(', ')}`,
+    `- emotion（省略可）: ${N.EMOTIONS.filter(e => e.id !== 'none').map(e => `${e.id}=${e.label}`).join(', ')}`,
+    '- strength（方言の強さ・省略可）: weak, mid, strong',
+    '- あなたが方言に書き換えた文章を使うときは、dialect_text=<方言の文章> を付ける。',
+    '- 笑い・ため息・間は <laugh> <sigh> <short pause> のように英語のタグで文中に入れられる。',
+  ].join('\n');
+  $('curLink').value = currentLink();
+}
+for (const b of document.querySelectorAll('.copy-btn')) {
+  b.addEventListener('click', async () => {
+    const src = $(b.dataset.copy);
+    const text = 'value' in src && src.tagName === 'INPUT' ? src.value : src.textContent;
+    const label = b.textContent;
+    try { await navigator.clipboard.writeText(text); b.textContent = 'コピーしました'; }
+    catch (err) { if (src.select) src.select(); b.textContent = '選択しました'; }
+    setTimeout(() => { b.textContent = label; }, 1600);
+  });
+}
 $('btnKeyShow').addEventListener('click', () => {
   const show = $('keyInput').type === 'password';
   $('keyInput').type = show ? 'text' : 'password';
@@ -4658,6 +4879,38 @@ $('btnVidCancel').addEventListener('click', () => { if (vidAbort) vidAbort.abort
 $('btnVidClose').addEventListener('click', () => $('dlgVideo').close());
 $('dlgVideo').addEventListener('close', () => { if (vidAbort) vidAbort.abort(); $('vidPlayer').pause(); });
 
+/* ---------------- links: #text=...&dialect=... fills the form (never generates by itself) ---------------- */
+function applyLink() {
+  const p = N.parseLink(location.hash);
+  if (!Object.keys(p).length) return;
+  history.replaceState(null, '', location.pathname + location.search);      // keep the text out of the address bar / history
+  const filled = [];
+  if (p.text) { $('srcText').value = p.text.slice(0, MAX_CHARS); updateCount(); filled.push('テキスト'); }
+  const d = p.dialect ? N.findDialect(p.dialect) : null;
+  if (d) { S.region = d.region; selectDialect(d.id); filled.push(d.name); }
+  if (p.strength && N.STRENGTHS.some(x => x.id === p.strength)) { S.strength = p.strength; renderStrength(); }
+  if (p.dialect_text) { $('dialectText').value = p.dialect_text.slice(0, 2000); S.converted = null; filled.push('方言テキスト'); }
+  if (p.voice) {
+    const v = p.voice === 'auto' || N.VOICE_PRESETS.some(x => x.id === p.voice) ? p.voice : N.myVoices.get(p.voice) ? OWN + p.voice : null;
+    if (v) renderVoiceSelect(v);
+  }
+  if (p.emotion && N.EMOTIONS.some(x => x.id === p.emotion)) $('emotion').value = p.emotion;
+  const m = { flash: 'gemini-3.8-flash-tts', lite: 'gemini-3.8-flash-lite-tts' }[p.model] || p.model;
+  if (m && N.TTS_MODELS.some(x => x.id === m)) { $('model').value = m; updatePriceNote(); }
+  updateStale();
+  note('linkNote', `リンクから入力しました（${filled.join('・') || '設定'}）。内容を確認して「音声を生成」を押してください。自動では生成しません。`, 'ok');
+}
+window.addEventListener('hashchange', applyLink);
+/* the link for what is on screen now (AI integration tab) */
+const currentLink = () => {
+  const v = $('voicePreset').value;
+  return N.buildLink({
+    text: $('srcText').value.trim(), dialect_text: $('dialectText').value.trim() !== ($('srcText').value.trim()) ? $('dialectText').value.trim() : '',
+    dialect: S.dialect, strength: S.strength, voice: v.startsWith(OWN) ? v.slice(OWN.length) : v,
+    emotion: $('emotion').value === 'none' ? '' : $('emotion').value, model: /lite/.test($('model').value) ? 'lite' : '',
+  }, location.origin + location.pathname);
+};
+
 /* ---------------- terms dialog ---------------- */
 $('btnTerms').addEventListener('click', () => $('dlgTerms').showModal());
 $('btnTermsClose').addEventListener('click', () => $('dlgTerms').close());
@@ -4678,7 +4931,8 @@ updatePriceNote();
 updateCount();
 updateBadge();
 renderHistory();
-if (!getKey()) openSettings();
+applyLink();
+if (!getKey()) openSettings('key');
 })();
 
 </script>

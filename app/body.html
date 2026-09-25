@@ -16,6 +16,7 @@
       <h1 id="heroTitle" class="hero-title">その言葉を、<span class="nowrap"><span class="grad">あの町の声</span>で。</span></h1>
       <p class="lead">標準語で書いて、方言と声を選ぶだけ。20の方言と、あなた自身の声で読み上げます。</p>
       <div id="heroWave" class="hero-wave" aria-hidden="true"></div>
+      <p id="linkNote" class="note" aria-live="polite"></p>
     </section>
 
     <!-- ================= step 1 ================= -->
@@ -92,6 +93,8 @@
     <p>
       <span>NAMARI v@VERSION@</span> ·
       <span>MIT License © 2026 4n5-Studio</span> ·
+      <button id="btnHelp" type="button" class="link" aria-haspopup="dialog">使い方</button> ·
+      <button id="btnAI" type="button" class="link" aria-haspopup="dialog">AI連携</button> ·
       <button id="btnTerms" type="button" class="link" aria-haspopup="dialog">利用について</button> ·
       <a href="https://github.com/4n5AI/NAMARI" target="_blank" rel="noopener noreferrer">GitHub</a>
     </p>
@@ -197,46 +200,163 @@
 </dialog>
 
 <!-- ================= settings ================= -->
-<dialog id="dlgSettings" class="dlg" aria-labelledby="dlgSettingsTitle">
+<dialog id="dlgSettings" class="dlg dlg-wide" aria-label="設定と使い方">
   <div class="dlg-body">
-    <h2 id="dlgSettingsTitle">APIキーの設定</h2>
-    <p>NAMARI は、あなたの Gemini API キーでブラウザから直接 Gemini API を呼び出します。
-      キーは <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a> で取得できます。</p>
-
-    <div id="keyCurrent" class="key-current" hidden>
-      <span>保存中のキー: <code id="keyMasked"></code> <span id="keyWhere" class="muted small"></span></span>
-      <button id="btnKeyDelete" type="button" class="danger small">キーを削除</button>
+    <div class="dlg-head">
+      <div id="settingsTabs" class="seg dlg-tabs" role="tablist" aria-label="設定と使い方">
+        <button type="button" role="tab" id="tabKey" aria-controls="panelKey" aria-selected="true">設定</button>
+        <button type="button" role="tab" id="tabHelp" aria-controls="panelHelp" aria-selected="false" tabindex="-1">使い方</button>
+        <button type="button" role="tab" id="tabAI" aria-controls="panelAI" aria-selected="false" tabindex="-1">AI連携</button>
+      </div>
+      <button id="btnSettingsX" type="button" class="icon-btn" aria-label="閉じる">×</button>
     </div>
 
-    <label class="field-label" for="keyInput">APIキー</label>
-    <div class="row">
-      <input id="keyInput" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="AIza..." class="grow">
-      <button id="btnKeyShow" type="button" class="ghost">表示</button>
-    </div>
-    <fieldset class="radios">
-      <legend class="field-label">保存方法</legend>
-      <label><input type="radio" name="keyMode" value="local" checked> このブラウザに保存（localStorage）</label>
-      <label><input type="radio" name="keyMode" value="session"> このタブを閉じるまで（sessionStorage）</label>
-    </fieldset>
-    <p id="keyError" class="note ng" aria-live="polite"></p>
+    <!-- ---------- tab: settings ---------- -->
+    <section id="panelKey" class="tab-panel" role="tabpanel" aria-labelledby="tabKey">
+      <h2>APIキーの設定</h2>
+      <p>NAMARI は、あなたの Gemini API キーでブラウザから直接 Gemini API を呼び出します。
+        キーは <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a> で取得できます。</p>
 
-    <div class="callout">
-      <strong>おすすめ：キーに「HTTPリファラー制限」をかけてください</strong>
-      <p>Google Cloud コンソールの「認証情報」でキーを開き、「ウェブサイトの制限」に次を追加すると、このサイト以外からキーを使えなくなります。</p>
-      <code id="referrerExample" class="block"></code>
-    </div>
+      <div id="keyCurrent" class="key-current" hidden>
+        <span>保存中のキー: <code id="keyMasked"></code> <span id="keyWhere" class="muted small"></span></span>
+        <button id="btnKeyDelete" type="button" class="danger small">キーを削除</button>
+      </div>
 
-    <div class="voices-box">
-      <strong>作成した方言の声</strong>
-      <p class="muted small">方言×声の組み合わせごとに、初回だけ Voice design で声を作り、このブラウザに記録しています（Google 側に1年間保存・1プロジェクト200件まで）。</p>
-      <div class="row between"><span id="voiceCount" class="small"></span><button id="btnVoicesDelete" type="button" class="ghost small">作成した声をすべて削除</button></div>
-      <p id="voicesNote" class="note" aria-live="polite"></p>
-    </div>
+      <label class="field-label" for="keyInput">APIキー</label>
+      <div class="row">
+        <input id="keyInput" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="AIza..." class="grow">
+        <button id="btnKeyShow" type="button" class="ghost">表示</button>
+      </div>
+      <fieldset class="radios">
+        <legend class="field-label">保存方法</legend>
+        <label><input type="radio" name="keyMode" value="local" checked> このブラウザに保存（localStorage）</label>
+        <label><input type="radio" name="keyMode" value="session"> このタブを閉じるまで（sessionStorage）</label>
+      </fieldset>
+      <p id="keyError" class="note ng" aria-live="polite"></p>
 
-    <div class="dlg-actions">
-      <button id="btnSettingsClose" type="button" class="ghost">閉じる</button>
-      <button id="btnKeySave" type="button" class="primary">保存</button>
-    </div>
+      <div class="callout">
+        <strong>おすすめ：キーに「HTTPリファラー制限」をかけてください</strong>
+        <p>Google Cloud コンソールの「認証情報」でキーを開き、「ウェブサイトの制限」に次を追加すると、このサイト以外からキーを使えなくなります。</p>
+        <code id="referrerExample" class="block"></code>
+      </div>
+
+      <div class="voices-box">
+        <strong>作成した方言の声</strong>
+        <p class="muted small">方言×声の組み合わせごとに、初回だけ Voice design で声を作り、このブラウザに記録しています（Google 側に1年間保存・1プロジェクト200件まで）。</p>
+        <div class="row between"><span id="voiceCount" class="small"></span><button id="btnVoicesDelete" type="button" class="ghost small">作成した声をすべて削除</button></div>
+        <p id="voicesNote" class="note" aria-live="polite"></p>
+      </div>
+
+      <div class="dlg-actions">
+        <button id="btnSettingsClose" type="button" class="ghost">閉じる</button>
+        <button id="btnKeySave" type="button" class="primary">保存</button>
+      </div>
+  
+    </section>
+
+    <!-- ---------- tab: how to use ---------- -->
+    <section id="panelHelp" class="tab-panel" role="tabpanel" aria-labelledby="tabHelp" tabindex="0" hidden>
+      <h2>使い方</h2>
+      <h3>はじめに（最初の1回だけ）</h3>
+      <ol class="steps">
+        <li><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a> で Gemini API キーを取得します。</li>
+        <li>「設定」タブにキーを貼り付けて「保存」を押します。</li>
+        <li>おすすめ：Google Cloud コンソールで、キーに HTTPリファラー制限をかけます（「設定」タブに手順があります）。</li>
+      </ol>
+      <h3>基本の3ステップ</h3>
+      <ol class="steps">
+        <li><strong>01 テキスト</strong>：読み上げたい文章を標準語で書きます（1000文字まで）。笑い・ため息・間などは、下のボタンからタグで入れられます（「その他のタグ」で36種類）。</li>
+        <li><strong>02 方言</strong>：地方のタブから方言を選び、強さ（弱・中・強）を決めて「変換」を押します。変換後の文章は手で直せます。</li>
+        <li><strong>03 声</strong>：声（自動・女性／男性・若め／年配・自分の声）、感情、モデルを選んで「音声を生成」を押します。</li>
+      </ol>
+      <p class="hint">「変換」を押さずに「音声を生成」を押しても、自動で方言に変換してから読み上げます。</p>
+      <h3>できあがった音声</h3>
+      <ul class="bullets">
+        <li>波形をクリックすると、その位置から再生します。</li>
+        <li>「WAVをダウンロード」で保存できます。生成した音声は、このブラウザの「履歴」に最新20件まで残ります。</li>
+        <li>「縦型動画（MP4）」で、字幕付きの 9:16 動画を書き出せます（TikTok・リール・ショート向け）。</li>
+      </ul>
+      <h3>方言の声について</h3>
+      <p>方言と声の組み合わせごとに、初回だけ、その土地の話し方をする声を作ります（数十秒かかります）。2回目からはすぐに使えます。作った声は「設定」タブから削除できます。</p>
+      <h3>自分の声で読み上げる</h3>
+      <ol class="steps">
+        <li>ステップ03の「自分の声を登録・管理」を開きます。</li>
+        <li>例文を読んで10〜30秒録音し、続けて同意文を読み上げて録音します。</li>
+        <li>名前を付けて登録すると、「声」の欄で選べるようになります。</li>
+      </ol>
+      <p class="hint">登録できるのは、あなた自身の声だけです。</p>
+      <h3>困ったとき</h3>
+      <dl class="faq">
+        <dt>「APIキーが正しくありません」と出る</dt>
+        <dd>「設定」タブでキーを貼り直してください。リファラー制限をかけている場合は、このページのURLが許可されているかも確認してください。</dd>
+        <dt>「リクエストが多すぎます」と出る</dt>
+        <dd>無料枠の上限か、一時的な混雑です。少し待ってから試してください。</dd>
+        <dt>方言の声を作れなかった</dt>
+        <dd>その回は既定の声で読み上げます。時間をおいて、もう一度生成してください。</dd>
+        <dt>録音できない</dt>
+        <dd>アドレスバーの設定から、このサイトにマイクの使用を許可してください。</dd>
+        <dt>動画を書き出せない</dt>
+        <dd>Chrome・Edge・Safari の最新版で開き、サイズを「720×1280（軽量）」にして試してください。</dd>
+      </dl>
+      <div class="dlg-actions"><button type="button" class="ghost" data-close>閉じる</button></div>
+    </section>
+
+    <!-- ---------- tab: AI integration ---------- -->
+    <section id="panelAI" class="tab-panel" role="tabpanel" aria-labelledby="tabAI" tabindex="0" hidden>
+      <h2>AI連携</h2>
+      <p>ChatGPT や Claude などの AI から NAMARI を使う方法は2つあります。</p>
+      <div class="ai-cards">
+        <div class="ai-card"><span class="step-dot">A</span><div><strong>MCP</strong><span class="sub">Claude デスクトップ版・Claude Code など</span>
+          <p>AI に「この文を博多弁で読み上げて」と頼むだけで、方言の音声（WAV）があなたのPCに保存されます。</p></div></div>
+        <div class="ai-card"><span class="step-dot">B</span><div><strong>リンク</strong><span class="sub">ChatGPT・Claude・Gemini など、どのAIでも</span>
+          <p>AI に NAMARI のリンクを作ってもらい、開くと入力済みの状態になります。</p></div></div>
+      </div>
+
+      <h3>A. MCP：Claude デスクトップ版（おすすめ）</h3>
+      <ol class="steps">
+        <li><a id="mcpbLink" href="mcp/namari.mcpb" download>namari.mcpb をダウンロード</a>します。</li>
+        <li>ダウンロードしたファイルを開くと、Claude のインストール画面が出ます（Claude の「設定」→「拡張機能」にドラッグ＆ドロップしても入れられます）。</li>
+        <li>「Gemini API キー」と「保存先フォルダ」を入力して、有効にします。</li>
+        <li>チャットで頼みます。例：<code>「今日はとても暑いですね」を博多弁で読み上げて</code></li>
+      </ol>
+      <p class="hint">音声は、保存先フォルダの中の「NAMARI」フォルダに WAV で保存されます。APIキーは Claude の設定（このPC）に保存され、NAMARI のサーバーはありません。</p>
+
+      <h3>A. MCP：Claude Code・そのほかの MCP クライアント</h3>
+      <p>Node.js 18 以上が必要です。リポジトリを取得して、MCP サーバーとして登録します。</p>
+      <div class="code-block"><pre id="cmdClaudeCode">git clone https://github.com/4n5AI/NAMARI.git
+claude mcp add namari -s user -e GEMINI_API_KEY=あなたのキー -- node "$(pwd)/NAMARI/mcp/server/index.js"</pre><button type="button" class="small copy-btn" data-copy="cmdClaudeCode">コピー</button></div>
+      <p>設定ファイル（JSON）で登録するアプリの場合：</p>
+      <div class="code-block"><pre id="cfgJson">{
+  "mcpServers": {
+    "namari": {
+      "command": "node",
+      "args": ["/NAMARIを置いた場所/NAMARI/mcp/server/index.js"],
+      "env": { "GEMINI_API_KEY": "あなたのキー" }
+    }
+  }
+}</pre><button type="button" class="small copy-btn" data-copy="cfgJson">コピー</button></div>
+      <p class="hint">コマンドに書いたキーはシェルの履歴に残ります。気になる場合は、あとで履歴から消してください。</p>
+
+      <h3>MCP でできること</h3>
+      <table class="price tools">
+        <tbody>
+          <tr><td><code>speak</code></td><td>方言に変換して読み上げ、WAV を保存（自分の声・感情・モデルも指定できます）</td></tr>
+          <tr><td><code>convert_to_dialect</code></td><td>方言の文章だけを作る</td></tr>
+          <tr><td><code>list_dialects</code></td><td>方言・声・感情・タグの一覧</td></tr>
+          <tr><td><code>list_voices</code></td><td>自分の声（Google に保存したもの）の一覧</td></tr>
+          <tr><td><code>make_namari_link</code></td><td>NAMARI を入力済みで開くリンクを作る（字幕付き動画を作りたいときなど）</td></tr>
+        </tbody>
+      </table>
+      <p class="hint">MCP で自分の声を使うには、NAMARI の「自分の声を登録」で「Google に保存」を選んでください。</p>
+
+      <h3>B. リンクで連携（どのAIでも）</h3>
+      <p>次の指示文を AI に渡しておくと（ChatGPT のカスタム指示・プロジェクト、Claude のプロジェクトなど）、方言で読み上げたいときに NAMARI のリンクを出してくれます。</p>
+      <div class="code-block"><pre id="aiPrompt"></pre><button type="button" class="small copy-btn" data-copy="aiPrompt">コピー</button></div>
+      <p>いま画面に入力している内容のリンク：</p>
+      <div class="row"><input id="curLink" class="grow" readonly aria-label="いまの入力内容のリンク"><button type="button" class="small copy-btn" data-copy="curLink">コピー</button></div>
+      <p class="hint">リンクの内容（# より後ろ）は、サーバーには送られません。ただし、リンクを受け取った人には文章が見えます。リンクを開いただけでは生成せず、「音声を生成」を押したときに、開いた人の APIキーで生成します。</p>
+      <div class="dlg-actions"><button type="button" class="ghost" data-close>閉じる</button></div>
+    </section>
   </div>
 </dialog>
 

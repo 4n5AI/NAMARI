@@ -1,10 +1,11 @@
-"""Build the single-file NAMARI app for GitHub Pages.
+"""Build the single-file NAMARI app for GitHub Pages, and the MCP bundle.
 usage: python3 build.py   -> index.html (vendor/mp4-muxer.js + src/*.js + app/body.html + app/style.css, inlined)
+                          -> mcp/namari.mcpb (Claude desktop one-click install: mcp/server + the shared src files)
 
 The page carries its own Content-Security-Policy (GitHub Pages cannot set headers):
 the inline <script> and <style> are allowed by their SHA-256 hashes, and the only
 network destination is the Gemini API."""
-import base64, glob, hashlib, os, urllib.parse
+import base64, glob, hashlib, json, os, urllib.parse, zipfile
 ROOT = os.path.dirname(os.path.abspath(__file__))
 os.chdir(ROOT)
 read = lambda p: open(p, encoding='utf-8').read()
@@ -78,3 +79,19 @@ html = f'''<!doctype html>
 '''
 open('index.html', 'w', encoding='utf-8').write(html)
 print('index.html', len(html.encode('utf-8')), 'bytes,', len(sources), 'scripts')
+
+# ---------------- MCP bundle (.mcpb = zip with manifest.json) ----------------
+MCP_LIB = ['src/01_util.js', 'src/03_api.js', 'src/04_dialects.js']      # the browser code the MCP server reuses
+manifest = json.loads(read('mcp/manifest.json'))
+if manifest['version'] != VERSION:                                      # keep the bundle version in step with the app
+    manifest['version'] = VERSION
+    open('mcp/manifest.json', 'w', encoding='utf-8').write(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
+entries = [('manifest.json', 'mcp/manifest.json'), ('icon.png', 'mcp/icon.png'), ('README.md', 'mcp/README.md'),
+           ('LICENSE', 'LICENSE'), ('server/index.js', 'mcp/server/index.js')] + [('server/lib/' + os.path.basename(f), f) for f in MCP_LIB]
+with zipfile.ZipFile('mcp/namari.mcpb', 'w', zipfile.ZIP_DEFLATED) as z:
+    for name, src in entries:                                           # fixed timestamps: same input -> same bytes
+        info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
+        info.external_attr = 0o644 << 16
+        info.compress_type = zipfile.ZIP_DEFLATED
+        z.writestr(info, open(src, 'rb').read())
+print('mcp/namari.mcpb', os.path.getsize('mcp/namari.mcpb'), 'bytes,', len(entries), 'files')
