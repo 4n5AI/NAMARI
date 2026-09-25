@@ -1,10 +1,10 @@
 <!doctype html>
-<!--! NAMARI v0.2.0 | MIT License | (c) 2026 4n5-Studio | https://github.com/4n5AI/NAMARI -->
+<!--! NAMARI v0.3.0 | MIT License | (c) 2026 4n5-Studio | https://github.com/4n5AI/NAMARI -->
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-hIK+37iGVqrMU6lgWSyOu7MlTo1IVrVVWEY4uHltTww='; style-src 'sha256-qx3gI77FTRDQ2Bhayz+xJJbaV6jyLq81yl23PSN2f+c='; connect-src https://generativelanguage.googleapis.com; img-src data:; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-oVrYTYPhdss2BIdPQHra05rXVCRemMMWjTpCpqes8to='; style-src 'sha256-3HkWWsBDTAVoWpF99PaS9NgV2n1GyB6p/jugfGFOgwM='; connect-src https://generativelanguage.googleapis.com; img-src data:; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
 <title>NAMARI — 方言読み上げツール</title>
 <meta name="description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など日本各地の方言で読み上げるブラウザ完結型ツール。Gemini API を使用。">
 <link rel="canonical" href="https://4n5ai.github.io/NAMARI/">
@@ -17,27 +17,38 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NAMARI — 方言読み上げツール">
 <meta name="twitter:description" content="標準語で書いた文章を、大阪弁・博多弁・津軽弁など日本各地の方言で読み上げるブラウザ完結型ツール。Gemini API を使用。">
-<meta name="theme-color" content="#f8f5ef" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14120f" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='#c23b17'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='#fff' font-family='serif'%3E%E8%A8%9B%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#4a2c20" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#120c09" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%239ee6c8'/%3E%3Ccircle cx='13' cy='14' r='3' fill='%234a2c20'/%3E%3Ccircle cx='52' cy='50' r='2.6' fill='%234a2c20'/%3E%3Ccircle cx='50' cy='13' r='2' fill='%234a2c20'/%3E%3Ctext x='32' y='45' font-size='36' font-weight='700' text-anchor='middle' fill='%234a2c20' font-family='serif'%3E%E8%A8%9B%3C/text%3E%3C/svg%3E">
 <style>
 /*! NAMARI | MIT License | (c) 2026 4n5-Studio */
+/* ---------- chocolate mint: mint ice cream + chocolate chips ----------
+   light = mint base, chocolate ink / buttons;  dark = chocolate base, mint ink / buttons */
 :root {
   color-scheme: light;
-  --bg: #f8f5ef;
-  --panel: #ffffff;
-  --raised: #f2ede4;
-  --line: #e2dbcf;
-  --line2: #cfc6b7;
-  --text: #1f1b16;
-  --muted: #6d655a;
-  --accent: #c23b17;
-  --accent-ink: #ffffff;
-  --accent-soft: rgba(194, 59, 23, 0.09);
-  --ok: #1d7a3e;
-  --ng: #b42318;
-  --warn-bg: #fff6e0;
-  --warn-line: #ecd29a;
+  --bg: #dcf4e8;
+  --panel: #fbfefc;
+  --raised: #eef9f4;
+  --field: #f5fcf9;
+  --line: #bfe4d2;
+  --line2: #97cfb6;
+  --text: #3b251b;
+  --muted: #7a5a4a;
+  --accent: #4a2c20;          /* chocolate */
+  --accent-ink: #c9f3df;      /* mint on chocolate */
+  --link: #17745a;
+  --sel: #c8efdc;
+  --ok: #17745a;
+  --ng: #b3261e;
+  --warn-bg: #fbeedd;
+  --warn-line: #e5c39c;
+  --header-bg: #4a2c20;
+  --header-ink: #c9f3df;
+  --header-line: #9ee6c8;
+  --chip: rgba(74, 44, 32, 0.2);
+  --wave: #a4d8c1;
+  --wave-played: #4a2c20;
+  --wave-head: #17745a;
   --ui: system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
   --serif: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
   --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
@@ -46,56 +57,79 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --bg: #14120f;
-    --panel: #1d1a16;
-    --raised: #27231e;
-    --line: #36302a;
-    --line2: #4a4239;
-    --text: #efe9e0;
-    --muted: #a69d90;
-    --accent: #ff8a5c;
-    --accent-ink: #1a0c05;
-    --accent-soft: rgba(255, 138, 92, 0.12);
-    --ok: #5fd08a;
-    --ng: #ff7b6e;
-    --warn-bg: #2a2213;
-    --warn-line: #5b4a22;
+    --bg: #1b120e;
+    --panel: #251913;
+    --raised: #2e1f18;
+    --field: #1f1510;
+    --line: #3e2b21;
+    --line2: #5a4132;
+    --text: #e3f7ee;
+    --muted: #a3c4b6;
+    --accent: #8fe3c4;        /* mint */
+    --accent-ink: #231610;    /* chocolate on mint */
+    --link: #8fe3c4;
+    --sel: rgba(143, 227, 196, 0.13);
+    --ok: #7fdcb5;
+    --ng: #ff8f84;
+    --warn-bg: #2f2216;
+    --warn-line: #5f4727;
+    --header-bg: #120c09;
+    --header-ink: #8fe3c4;
+    --header-line: #8fe3c4;
+    --chip: rgba(0, 0, 0, 0.28);
+    --wave: #5a4132;
+    --wave-played: #8fe3c4;
+    --wave-head: #e3f7ee;
   }
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 var(--ui); -webkit-font-smoothing: antialiased; }
+body {
+  margin: 0; color: var(--text); font: 16px/1.7 var(--ui); -webkit-font-smoothing: antialiased;
+  background-color: var(--bg);
+  /* scattered chocolate chips */
+  background-image:
+    radial-gradient(5px 3.5px at 24px 30px, var(--chip) 96%, transparent),
+    radial-gradient(3px 4px at 130px 64px, var(--chip) 96%, transparent),
+    radial-gradient(4.5px 3px at 74px 156px, var(--chip) 96%, transparent),
+    radial-gradient(3.5px 3.5px at 196px 118px, var(--chip) 96%, transparent),
+    radial-gradient(2.5px 3px at 168px 206px, var(--chip) 96%, transparent);
+  background-size: 230px 230px;
+}
 button, input, select, textarea { font: inherit; color: inherit; }
-a { color: var(--accent); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+a { color: var(--link); }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 
-/* ---------- header ---------- */
-.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+/* ---------- header: a chocolate bar with a mint edge ---------- */
+.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; background: var(--header-bg); color: var(--header-ink); border-bottom: 3px solid var(--header-line); }
 .brand { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-.brand .mark { font: 700 26px/1 var(--serif); color: var(--accent); }
-.brand .word { font: 700 15px/1 var(--ui); letter-spacing: 0.18em; }
-.brand .tag { font-size: 12px; color: var(--muted); white-space: nowrap; }
-.settings-btn { display: inline-flex; align-items: center; gap: 8px; }
-.badge { font-size: 11px; line-height: 1; padding: 4px 7px; border-radius: 999px; background: var(--ng); color: #fff; }
-.badge.ok { background: var(--ok); color: #fff; }
-@media (prefers-color-scheme: dark) { .badge, .badge.ok { color: #10100e; } }
+.brand .mark { font: 700 26px/1 var(--serif); color: var(--header-line); }
+.brand .word { font: 700 15px/1 var(--ui); letter-spacing: 0.18em; color: var(--header-ink); }
+.brand .tag { font-size: 12px; color: var(--header-ink); opacity: 0.75; white-space: nowrap; }
+.bar .settings-btn { display: inline-flex; align-items: center; gap: 8px; color: var(--header-ink); border-color: var(--header-line); background: transparent; }
+.bar .settings-btn:hover { background: rgba(158, 230, 200, 0.12); border-color: var(--header-line); }
+.bar :focus-visible { outline-color: var(--header-line); }
+.badge { font-size: 11px; line-height: 1; padding: 4px 7px; border-radius: 999px; background: #ff8f84; color: #2a0f0b; font-weight: 700; }
+.badge.ok { background: var(--header-line); color: #231610; }
 
 /* ---------- layout ---------- */
 .main { max-width: 760px; margin: 0 auto; padding: 8px 16px 24px; }
 .lead { margin: 14px 2px 6px; color: var(--muted); font-size: 15px; }
-.step { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 14px 0; }
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 14px 0; box-shadow: 0 1px 0 var(--line); }
 .step h2 { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 0 0 12px; font-size: 18px; }
 .num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 15px; font-weight: 700; }
+.num-icon { font-size: 16px; }
 .sub { font-size: 13px; font-weight: 400; color: var(--muted); }
+.push { margin-left: auto; }
 .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; }
 .row.between { justify-content: space-between; }
 .grow { flex: 1 1 200px; min-width: 0; }
 .muted { color: var(--muted); }
 .small { font-size: 13px; }
 .hint { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
-.note { margin: 10px 0 0; font-size: 14px; white-space: pre-wrap; min-height: 0; }
+.note { margin: 10px 0 0; font-size: 14px; white-space: pre-wrap; }
 .note:empty { display: none; }
 .note.ok { color: var(--ok); }
 .note.ng { color: var(--ng); }
@@ -103,51 +137,65 @@ a { color: var(--accent); }
 .note button { margin-left: 8px; }
 
 /* ---------- controls ---------- */
-textarea, input:not([type=radio]), select { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--bg); }
+textarea, input:not([type=radio]), select { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--field); }
 textarea { resize: vertical; line-height: 1.8; }
 select { cursor: pointer; }
 .field-label { display: block; margin: 12px 0 4px; font-size: 13px; color: var(--muted); }
 .field-label select { margin-top: 4px; color: var(--text); font-size: 15px; }
 .label { font-size: 14px; color: var(--muted); }
+input[type=radio] { accent-color: var(--accent); }
 button, .button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--panel); cursor: pointer; text-decoration: none; color: var(--text); line-height: 1.4; }
-button:hover, .button:hover { border-color: var(--muted); }
+button:hover, .button:hover { border-color: var(--accent); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 button.primary, .button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
-button.primary:hover { filter: brightness(1.06); }
+button.primary:hover { filter: brightness(1.12); }
 button.ghost { background: transparent; }
 button.danger { color: var(--ng); border-color: var(--ng); background: transparent; }
 button.small { padding: 4px 10px; font-size: 13px; }
-button.big { width: 100%; padding: 13px 16px; font-size: 17px; margin-top: 14px; }
-button.link { padding: 0; border: 0; background: none; color: var(--accent); text-decoration: underline; font-size: inherit; }
+button.big { width: 100%; padding: 13px 16px; font-size: 17px; margin-top: 14px; border-radius: 999px; }
+button.link { padding: 0; border: 0; background: none; color: var(--link); text-decoration: underline; font-size: inherit; }
 .tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .tag-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
-.tag-buttons button { padding: 3px 10px; font-size: 13px; border-radius: 999px; }
+.tag-buttons button { padding: 3px 10px; font-size: 13px; border-radius: 999px; background: var(--raised); }
 .count { font: 13px var(--mono); color: var(--muted); }
 .count.over { color: var(--ng); }
 
 /* ---------- step 2: regions & dialects ---------- */
-.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
-.tabs button { flex: none; padding: 6px 12px; border-radius: 999px; font-size: 14px; }
-.tabs button[aria-selected=true] { background: var(--text); border-color: var(--text); color: var(--bg); }
-.tabs button .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-left: 2px; }
+.tabs { position: relative; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.tabs button { flex: none; padding: 6px 12px; border-radius: 999px; font-size: 14px; background: var(--raised); }
+.tabs button[aria-selected=true] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.tabs button .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--link); margin-left: 2px; }
+.tabs button[aria-selected=true] .dot { background: var(--accent-ink); }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 12px 0 4px; }
-.card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 12px; text-align: left; border-radius: 12px; background: var(--bg); }
+.card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 12px; text-align: left; border-radius: 12px; background: var(--raised); }
 .card .name { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 6px; }
 .card .sample { font-size: 12px; color: var(--muted); line-height: 1.5; }
 .card .beta { font-size: 11px; font-weight: 700; padding: 0 6px; border-radius: 999px; border: 1px solid var(--muted); color: var(--muted); }
-.card[aria-checked=true] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: var(--accent-soft); }
+.card[aria-checked=true] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: var(--sel); }
 .convert-row { margin-top: 14px; }
 .seg { display: inline-flex; border: 1px solid var(--line2); border-radius: var(--r); overflow: hidden; }
 .seg button { border: 0; border-radius: 0; padding: 7px 16px; background: transparent; }
 .seg button + button { border-left: 1px solid var(--line2); }
-.seg button[aria-checked=true] { background: var(--text); color: var(--bg); font-weight: 700; }
+.seg button[aria-checked=true] { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
 #btnConvert { margin-left: auto; min-width: 96px; }
 
 /* ---------- step 3 ---------- */
 .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 12px; }
 .grid3 .field-label { margin-top: 0; }
-.result { margin-top: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
-.result audio { width: 100%; }
+.result { margin-top: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--raised); }
+.result-title { display: block; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+.result audio { width: 100%; margin-top: 8px; }
+.wave { display: block; width: 100%; height: 76px; cursor: pointer; border-radius: 8px; touch-action: none; }
+
+/* ---------- history ---------- */
+.hist-list { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 8px; }
+.hist-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--raised); }
+.hist-item.playing { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; background: var(--sel); }
+.hist-main { display: grid; min-width: 0; line-height: 1.5; }
+.hist-title { font-weight: 700; font-size: 14px; }
+.hist-meta { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.hist-text { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-actions { display: flex; gap: 6px; flex: none; }
 
 /* ---------- footer ---------- */
 .foot { max-width: 760px; margin: 0 auto; padding: 8px 16px 32px; font-size: 13px; color: var(--muted); text-align: center; }
@@ -155,8 +203,8 @@ button.link { padding: 0; border: 0; background: none; color: var(--accent); tex
 .foot a { color: inherit; }
 
 /* ---------- dialogs ---------- */
-.dlg { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); color: var(--text); }
-.dlg::backdrop { background: rgba(10, 8, 6, 0.55); }
+.dlg { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid var(--line); border-top: 6px solid var(--accent); border-radius: 16px; background: var(--panel); color: var(--text); }
+.dlg::backdrop { background: rgba(27, 18, 14, 0.6); }
 .dlg-body { padding: 18px 18px 16px; }
 .dlg h2 { margin: 0 0 8px; font-size: 19px; }
 .dlg h3 { margin: 16px 0 4px; font-size: 15px; }
@@ -181,6 +229,8 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
   .grid3 .field-label { margin-top: 8px; }
   .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   #btnConvert { margin-left: 0; flex: 1 1 100%; }
+  .hist-item { flex-direction: column; align-items: stretch; }
+  .hist-actions button { flex: 1; }
 }
 
 </style>
@@ -241,6 +291,8 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
       <button id="btnGenerate" type="button" class="primary big">音声を生成</button>
       <p id="genNote" class="note" aria-live="polite"></p>
       <div id="result" class="result" hidden>
+        <div class="result-head"><span id="resultTitle" class="result-title"></span></div>
+        <canvas id="wave" class="wave" role="slider" tabindex="0" aria-label="再生位置（クリック・左右キーで移動）" aria-valuemin="0"></canvas>
         <audio id="player" controls preload="auto"></audio>
         <div class="row between">
           <a id="btnDownload" class="button" download>WAVをダウンロード</a>
@@ -249,11 +301,20 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
       </div>
       <p id="priceNote" class="hint"></p>
     </section>
+
+    <!-- ================= history ================= -->
+    <section class="step history" aria-labelledby="hH">
+      <h2 id="hH"><span class="num num-icon" aria-hidden="true">↺</span>履歴<span id="histCount" class="sub"></span>
+        <button id="btnHistClear" type="button" class="ghost small push">すべて削除</button></h2>
+      <p id="histNote" class="note" aria-live="polite"></p>
+      <ol id="histList" class="hist-list"></ol>
+      <p id="histEmpty" class="hint">まだ履歴はありません。生成した音声は、このブラウザに最新20件まで保存されます。</p>
+    </section>
   </main>
 
   <footer class="foot">
     <p>
-      <span>NAMARI v0.2.0</span> ·
+      <span>NAMARI v0.3.0</span> ·
       <span>MIT License © 2026 4n5-Studio</span> ·
       <button id="btnTerms" type="button" class="link" aria-haspopup="dialog">利用について</button> ·
       <a href="https://github.com/4n5AI/NAMARI" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -315,7 +376,7 @@ code.block { display: block; padding: 6px 8px; border-radius: 6px; background: v
     <h3>生成した音声</h3>
     <p>生成した音声の扱いは、<a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Gemini API 利用規約</a>に従ってください。生成音声には Google の SynthID による電子透かしが入ります。</p>
     <h3>送信するデータ</h3>
-    <p>入力したテキストとAPIキーは、Gemini API（generativelanguage.googleapis.com）以外には送信しません。キーはこのブラウザにだけ保存され、「設定」からいつでも削除できます。方言の変換と読み上げのリクエストは、Google 側に保存しない設定（store: false）で送っています。</p>
+    <p>入力したテキストとAPIキーは、Gemini API（generativelanguage.googleapis.com）以外には送信しません。キーと履歴（生成した音声）はこのブラウザにだけ保存され、いつでも削除できます。方言の変換と読み上げのリクエストは、Google 側に保存しない設定（store: false）で送っています。</p>
     <h3>料金の目安（有料枠・2026年12月末まで）</h3>
     <table class="price">
       <thead><tr><th>処理</th><th>入力</th><th>出力</th></tr></thead>
@@ -439,7 +500,7 @@ N.stamp = (d = new Date()) => [d.getFullYear(), d.getMonth() + 1, d.getDate(), '
 /*! NAMARI | MIT License | (c) 2026 4n5-Studio */
 /* ============================================================
    NAMARI — storage: API key (local / session), designed-voice cache,
-   preferences. Every access is wrapped: private windows and blocked
+   preferences, history (IndexedDB). Every access is wrapped: private windows and blocked
    site data must not break the page.
    ============================================================ */
 (() => {
@@ -482,6 +543,55 @@ N.voiceCache = {
 N.prefs = {
   get() { return readJson(PREFS_NAME, {}); },
   set(patch) { write('local', PREFS_NAME, JSON.stringify(Object.assign(this.get(), patch))); },
+};
+
+/* ---------------- history: IndexedDB, newest N.HISTORY_MAX entries ----------------
+   entry: {id, created, dialectId, dialectName, voiceLabel, emotionLabel, model, text, duration, cost, bytes (Uint8Array WAV)} */
+N.HISTORY_MAX = 20;
+const DB_NAME = 'namari', DB_VERSION = 1, STORE = 'history';
+let dbPromise = null;
+const openDb = () => dbPromise || (dbPromise = new Promise((resolve, reject) => {
+  let req;
+  try { req = window.indexedDB.open(DB_NAME, DB_VERSION); } catch (e) { reject(e); return; }
+  req.onupgradeneeded = () => {
+    const db = req.result;
+    if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+  };
+  req.onsuccess = () => resolve(req.result);
+  req.onerror = () => reject(req.error || new Error('IndexedDB open failed'));
+  req.onblocked = () => reject(new Error('IndexedDB blocked'));
+}).catch(err => { dbPromise = null; throw err; }));
+
+/* run fn(store) in one transaction; resolves with whatever fn stored in box.value once it commits */
+const run = (mode, fn) => openDb().then(db => new Promise((resolve, reject) => {
+  const t = db.transaction(STORE, mode);
+  const box = {};
+  fn(t.objectStore(STORE), box);
+  t.oncomplete = () => resolve(box.value);
+  t.onerror = () => reject(t.error);
+  t.onabort = () => reject(t.error || new Error('IndexedDB transaction aborted'));
+}));
+
+N.history = {
+  available: (() => { try { return !!window.indexedDB; } catch (e) { return false; } })(),
+  /* add, then drop the oldest beyond the limit — in the same transaction */
+  add(entry) {
+    return run('readwrite', (st, box) => {
+      st.add(entry).onsuccess = e => {
+        box.value = e.target.result;
+        st.getAllKeys().onsuccess = ev => {
+          const keys = ev.target.result;                 // ascending = oldest first
+          for (const k of keys.slice(0, Math.max(0, keys.length - N.HISTORY_MAX))) st.delete(k);
+        };
+      };
+    });
+  },
+  list() {
+    return run('readonly', (st, box) => { st.getAll().onsuccess = e => { box.value = e.target.result.sort((a, b) => b.id - a.id); }; });
+  },
+  get(id) { return run('readonly', (st, box) => { st.get(id).onsuccess = e => { box.value = e.target.result || null; }; }); },
+  del(id) { return run('readwrite', st => { st.delete(id); }); },
+  clear() { return run('readwrite', st => { st.clear(); }); },
 };
 })();
 
@@ -807,6 +917,14 @@ N.estimateCost = (model, inputTokens, outputTokens) => {
 N.REGIONS = ['北海道', '東北', '関東', '中部', '近畿', '中国', '四国', '九州', '沖縄'];
 
 N.DIALECTS = [
+  /* ---------- 北海道 ---------- */
+  {
+    id: 'hokkaido', name: '北海道弁', region: '北海道', defaultPreset: 'f-young',
+    sampleText: 'なまら寒いっしょ。手袋はいてったほうがいいべさ。',
+    convertHint: '語尾「〜べ」「〜べさ」「〜っしょ（〜でしょ）」「〜さ」「〜したっけ（〜したら）」、「なまら（とても）」「したっけ（じゃあね）」「なんもなんも（いえいえ）」「めんこい（かわいい）」「投げる（捨てる）」「手袋をはく（はめる）」「こわい（疲れた）」「わや（めちゃくちゃ）」「しばれる（冷え込む）」「〜さる（自然とそうなる：押ささる）」。イントネーションは標準語に近く、語尾と語彙で北海道らしさを出す。',
+    voiceDesignPrompt: 'born and raised in Sapporo, Hokkaido, speaking Japanese with a mild Hokkaido accent, close to standard Japanese but with relaxed, friendly Hokkaido intonation.',
+  },
+  /* ---------- 東北 ---------- */
   {
     id: 'tsugaru', name: '津軽弁', region: '東北', beta: true, defaultPreset: 'm-old',
     sampleText: 'わいは！ めやぐだの。',
@@ -814,16 +932,55 @@ N.DIALECTS = [
     voiceDesignPrompt: 'born and raised in the Tsugaru region of Aomori, speaking Japanese with a strong rural Tsugaru (northern Tohoku) accent, soft voiced consonants and a slow, warm rhythm.',
   },
   {
+    id: 'akita', name: '秋田弁', region: '東北', beta: true, defaultPreset: 'm-old',
+    sampleText: 'んだんだ。まんず、けっけ。',
+    convertHint: '語尾「〜だべ」「〜だがら（〜だから）」「〜ねが（〜しないか）」「〜すべ（〜しよう）」「〜だっす（丁寧）」、「んだ（そうだ）」「まんず（まず・とにかく）」「け（食べて・来て）」「めんこい（かわいい）」「おめ（あなた）」「おら（私）」「しゃっこい（冷たい）」「ねまる（座る）」「あべ（行こう）」「ぼっこれる（壊れる）」。語中のカ行・タ行が濁りやすい（あかい→あがい、はたけ→はだげ）。強くしても、文字で読んで意味が追える程度にとどめる。',
+    voiceDesignPrompt: 'born and raised in rural Akita, speaking Japanese with a strong Akita (northern Tohoku) accent, nasal, voiced consonants and a soft, unhurried rhythm.',
+  },
+  {
+    id: 'sendai', name: '仙台弁', region: '東北', beta: true, defaultPreset: 'm-young',
+    sampleText: 'いぎなりうめぇっちゃ。行くべっちゃ。',
+    convertHint: '語尾「〜っちゃ（〜だよ）」「〜だっちゃ」「〜べ」「〜すっぺ（〜しよう）」「〜がら（〜から）」「〜だべした」、「いぎなり（とても）」「いずい（しっくりこない）」「おだづ（ふざける）」「ごしゃぐ（怒る）」「めんこい（かわいい）」「かだる（仲間に入る）」「ねっぱす（くっつける）」。語中のカ行・タ行が少し濁る。',
+    voiceDesignPrompt: 'born and raised in Sendai, Miyagi, speaking Japanese with a natural Sendai (southern Tohoku) accent, slightly voiced consonants and a flat, gentle intonation.',
+  },
+  /* ---------- 関東 ---------- */
+  {
+    id: 'ibaraki', name: '茨城弁', region: '関東', beta: true, defaultPreset: 'm-old',
+    sampleText: 'そうだっぺ？ ごじゃっぺ言うでねぇよ。',
+    convertHint: '語尾「〜だっぺ」「〜だっぺよ」「〜べ」「〜け？（〜かい？）」「〜さ（〜へ）」「〜でねぇ（〜ではない）」、「ごじゃっぺ（いいかげん）」「いじやける（腹が立つ）」「でれすけ（だらしない人）」「こわい（疲れた）」「ぶっこく（投げる）」「おっぺす（押す）」。抑揚が少なく平らに話す。',
+    voiceDesignPrompt: 'born and raised in rural Ibaraki, speaking Japanese with a flat, accentless Ibaraki (northern Kanto) intonation and a blunt but good-natured tone.',
+  },
+  {
+    id: 'edokko', name: '江戸っ子（べらんめえ）', region: '関東', defaultPreset: 'm-old',
+    sampleText: 'てやんでえ、べらぼうめ！ ちゃっちゃとしやがれ。',
+    convertHint: '東京下町の威勢のいい話し言葉。「ない→ねえ」「たいへん→てえへん」「うまい→うめえ」のように「あい・おい」を「えー」にする、「ひ」を「し」にする（ひとつ→しとつ、ひがし→しがし）。「てやんでえ」「べらぼうめ」「〜しやがれ」「おいら」「あたぼうよ（当たり前だ）」「こちとら」「おめえさん」「ちげえねえ（違いない）」「〜ってんだ」「粋」。早口で歯切れよく。',
+    voiceDesignPrompt: 'born and raised in shitamachi, old downtown Tokyo, speaking Japanese in brisk, rough Edokko (Beranmee) style, with rapid delivery and punchy, spirited intonation.',
+  },
+  {
     id: 'standard', name: '標準語', region: '関東', standard: true, defaultPreset: 'f-young',
     sampleText: 'ありがとうございます。とても助かりました。',
     convertHint: '',
     voiceDesignPrompt: 'speaking clear, standard Tokyo Japanese with a neutral accent and natural, friendly intonation.',
   },
+  /* ---------- 中部 ---------- */
   {
     id: 'nagoya', name: '名古屋弁', region: '中部', defaultPreset: 'm-young',
     sampleText: 'でらうまいがや。はよ食べやあ。',
     convertHint: '語尾「〜だがや」「〜だがね」「〜でよ」「〜がや」「〜やあ（勧め・軽い命令：はよしやあ）」「〜してまった（〜してしまった）」「〜しとる」、「でら／どえりゃあ（とても）」「えらい（疲れた）」「かんわ（だめだ）」「たわけ」「ときんときん（とがっている）」。「〜ない」は「〜にゃあ」になりやすい。',
     voiceDesignPrompt: 'born and raised in Nagoya, speaking Japanese with a distinctive Nagoya (Owari) accent, drawn-out vowels and a cheerful, down-to-earth tone.',
+  },
+  {
+    id: 'kanazawa', name: '金沢弁', region: '中部', beta: true, defaultPreset: 'f-old',
+    sampleText: 'あんやと。ゆっくりしていきまっし。',
+    convertHint: '語尾「〜まっし（〜しなさい：食べまっし）」「〜やじ（〜だよ）」「〜げん（〜のだ）」「〜がや」「〜ねんて」「〜しとる」、「あんやと（ありがとう）」「きのどくな（恐縮です・ありがとう）」「だらぶち（ばか）」「ちゃべちゃべ（おしゃべり）」「かたがる（傾く）」。語尾をゆったりのばし、うねるように話す。',
+    voiceDesignPrompt: 'born and raised in Kanazawa, Ishikawa, speaking Japanese with a soft Kanazawa (Hokuriku) accent, gently undulating intonation and elegant, drawn-out sentence endings.',
+  },
+  /* ---------- 近畿 ---------- */
+  {
+    id: 'kyoto', name: '京都弁', region: '近畿', defaultPreset: 'f-young',
+    sampleText: 'おおきに。またおこしやす。',
+    convertHint: '語尾「〜どす」「〜え」「〜はる（敬語）」「〜しとくれやす」「〜へん（否定）」「〜やろか」「〜よし（〜しなさい：食べよし）」、「おおきに」「おこしやす」「かんにん（ごめん）」「はんなり」「いけず（意地悪）」「ほかす（捨てる）」。大阪弁よりやわらかく上品で、ゆったり話す。',
+    voiceDesignPrompt: 'born and raised in Kyoto, speaking Japanese with a soft, elegant Kyoto accent, gentle and graceful intonation at a slow, refined pace.',
   },
   {
     id: 'osaka', name: '大阪弁', region: '近畿', defaultPreset: 'f-young',
@@ -832,19 +989,70 @@ N.DIALECTS = [
     voiceDesignPrompt: 'born and raised in Osaka, speaking Japanese with a natural, lively Osaka (Kansai) accent and a friendly, humorous rhythm.',
   },
   {
+    id: 'kobe', name: '神戸弁', region: '近畿', defaultPreset: 'f-young',
+    sampleText: '何しとう？ 今日めっちゃええ天気やん。',
+    convertHint: '語尾「〜とう（〜している：何しとう？）」「〜とった」「〜よう（〜している：雨降りよう）」「〜やん」「〜へん」「〜しい（〜しなさい）」、「めっちゃ」「ほんま」「べっちょない（大丈夫）」「だぼ（ばか）」。大阪弁より少しやわらかく、「〜とう」「〜よう」で神戸らしさを出す。',
+    voiceDesignPrompt: 'born and raised in Kobe, Hyogo, speaking Japanese with a light, urban Kobe (Kansai) accent, casual and breezy, a little softer than Osaka speech.',
+  },
+  /* ---------- 中国 ---------- */
+  {
+    id: 'hiroshima', name: '広島弁', region: '中国', defaultPreset: 'm-young',
+    sampleText: 'ぶちうまいけぇ、食べてみんさい。',
+    convertHint: '語尾「〜じゃけぇ（〜だから）」「〜じゃ」「〜けぇ」「〜しんさい（〜しなさい）」「〜しょーる（〜している最中）」「〜しとる（〜してある）」「〜のう」「〜ん？（〜の？）」、「ぶち（とても）」「たいぎい（面倒）」「はぶてる（すねる）」「いなげな（変な）」「みやすい（簡単）」「たう（届く）」。',
+    voiceDesignPrompt: 'born and raised in Hiroshima, speaking Japanese with a hearty Hiroshima (Chugoku) accent, strong and straightforward, with a warm, rough-edged tone.',
+  },
+  {
+    id: 'okayama', name: '岡山弁', region: '中国', defaultPreset: 'f-old',
+    sampleText: 'でーれーうめえが。はよ来られぇ。',
+    convertHint: '語尾「〜じゃ」「〜が（〜だよ）」「〜けぇ（〜だから）」「〜られぇ（〜しなさい：来られぇ）」「〜んじゃ」「〜しょーる（〜している）」、「でーれー／ぼっけー（とても）」「もんげー（すごい）」「おえん（だめだ）」「きょーてー（怖い）」。「すごい→すげー」「うまい→うめえ」のように母音をのばす。',
+    voiceDesignPrompt: 'born and raised in Okayama, speaking Japanese with a broad Okayama (Chugoku) accent, drawn-out vowels and an easygoing, friendly tone.',
+  },
+  /* ---------- 四国 ---------- */
+  {
+    id: 'tosa', name: '土佐弁', region: '四国', defaultPreset: 'm-young',
+    sampleText: 'まっこと、えいがやき。',
+    convertHint: '語尾「〜ぜよ」「〜がや（〜なのだ）」「〜やき／〜きに（〜だから）」「〜ゆう（〜している：言いゆう）」「〜ちゅう（〜してある：しちゅう）」「〜ろう（〜だろう）」「〜いかん」、「まっこと（本当に）」「こじゃんと（とても・たくさん）」「えい（よい）」「たまるか（驚き）」「のうが悪い（具合が悪い）」。力強く豪快に。',
+    voiceDesignPrompt: 'born and raised in Kochi (Tosa), speaking Japanese with a bold Tosa (Shikoku) accent, confident and hearty, with a big, open-hearted delivery.',
+  },
+  {
+    id: 'iyo', name: '伊予弁', region: '四国', beta: true, defaultPreset: 'f-old',
+    sampleText: 'ほうじゃけん、がんばろや。',
+    convertHint: '語尾「〜けん（〜だから）」「〜ぞな」「〜もし（ていねい：〜ですよ）」「〜なもし」「〜とる」「〜んよ」「〜ろや（〜しよう）」「〜しよる（〜している）」、「ほうじゃ（そうだ）」「ほやけん（だから）」「いなげな（変な）」「〜しとうみ（〜してごらん）」。のんびり、やわらかく話す。',
+    voiceDesignPrompt: 'born and raised in Matsuyama, Ehime, speaking Japanese with a mellow Iyo (Ehime) accent, slow and gentle, with a laid-back, kindly tone.',
+  },
+  /* ---------- 九州 ---------- */
+  {
     id: 'hakata', name: '博多弁', region: '九州', defaultPreset: 'f-young',
     sampleText: 'なんしよーと？ 今日はばり寒かね。',
     convertHint: '語尾「〜と？（〜の？）」「〜ちゃん」「〜けん（〜だから）」「〜ばい」「〜たい」「〜やけん」「〜しとー（〜している）」「〜ちゃ」、「ばり（とても）」「よか（よい）」「なんしよーと（何してるの）」「好いとーよ」「〜してみらん？（〜してみない？）」。形容詞は「寒か」「よか」のように「〜か」になることがある。',
     voiceDesignPrompt: 'born and raised in Hakata, Fukuoka, speaking Japanese with a warm Hakata (northern Kyushu) accent and soft, affectionate intonation.',
   },
   {
+    id: 'nagasaki', name: '長崎弁', region: '九州', beta: true, defaultPreset: 'f-young',
+    sampleText: 'よかよか。ばってん、雨の降りよるけん気をつけんばよ。',
+    convertHint: '語尾「〜ばい」「〜さ」「〜けん（〜だから）」「〜と？（〜の？）」「〜んば（〜しなければ：せんば）」「〜よる（〜している）」「〜ごたる（〜のようだ）」、「ばってん（でも）」「よか（よい）」「ばさらか（とても）」「こがん（こんな）」「あがん（あんな）」「さるく（ぶらぶら歩く）」「うっちゃる（捨てる）」。主語に「の」を使う（雨の降りよる）。',
+    voiceDesignPrompt: 'born and raised in Nagasaki, speaking Japanese with a warm Nagasaki (western Kyushu) accent, a rolling rhythm and relaxed, harbor-town friendliness.',
+  },
+  {
+    id: 'kumamoto', name: '熊本弁', region: '九州', defaultPreset: 'm-young',
+    sampleText: 'むしゃんよか！ はよ食べなっせ。',
+    convertHint: '語尾「〜ばい」「〜たい」「〜けん（〜だから）」「〜と？（〜の？）」「〜なっせ（〜しなさい：食べなっせ）」「〜ごたる（〜のようだ）」「〜しよる（〜している）」、「ばってん（でも）」「むしゃんよか（かっこいい）」「あとぜき（開けたら閉める）」「がまだす（がんばる）」「好いとっと」。形容詞は「寒か」「よか」のように「〜か」になる。',
+    voiceDesignPrompt: 'born and raised in Kumamoto, speaking Japanese with a strong Kumamoto (central Kyushu) accent, hearty and direct, with a steady, grounded tone.',
+  },
+  {
+    id: 'kagoshima', name: '鹿児島弁', region: '九州', beta: true, defaultPreset: 'm-old',
+    sampleText: 'おやっとさぁ。まこて、よか天気じゃっど。',
+    convertHint: '語尾「〜じゃっど（〜だよ）」「〜ごわす（〜です：古風）」「〜が（〜のだ）」「〜け？（〜か？）」「〜しやんせ（〜してください）」「〜しちょっ（〜している）」、「おやっとさぁ（お疲れさま）」「まこて（本当に）」「わっぜ（とても）」「てげてげ（ほどほど）」「だれやめ（晩酌）」「げんねか（恥ずかしい）」。語末の音がつまる（行く→いっ）。本格的な鹿児島弁は聞き取りにくいので、意味が追える程度にとどめる。',
+    voiceDesignPrompt: 'born and raised in Kagoshima, speaking Japanese with a strong Kagoshima (Satsuma, southern Kyushu) accent, clipped word endings and a proud, sturdy tone.',
+  },
+  /* ---------- 沖縄 ---------- */
+  {
     id: 'okinawa', name: 'ウチナーヤマトグチ', region: '沖縄', beta: true, defaultPreset: 'f-old',
     sampleText: 'なんくるないさ〜。ゆっくりしていってね〜。',
     convertHint: '沖縄の人が話す日本語（ウチナーヤマトグチ）。本格的な琉球語（ウチナーグチ）にはしない。語尾「〜さ」「〜さぁ」「〜ね〜」「〜よ〜」「〜はず（〜だろう）」「〜してからに」、「なんくるないさ（なんとかなる）」「でーじ（とても）」「ちばりよー（がんばれ）」「めんそーれ（いらっしゃい）」「あきさみよー（驚き・あきれ）」「〜ですよね〜」。語尾がのびやかで、やわらかい。',
     voiceDesignPrompt: 'born and raised in Okinawa, speaking Japanese with a gentle Okinawan accent (Uchinaa-Yamatoguchi), a relaxed island rhythm and warm, easygoing intonation.',
   },
-];
-N.dialect = id => N.DIALECTS.find(d => d.id === id) || null;
+];N.dialect = id => N.DIALECTS.find(d => d.id === id) || null;
 
 /* voice presets (option A: a designed voice per dialect x preset, created on first use) */
 N.VOICE_PRESETS = [
@@ -880,7 +1088,126 @@ N.TAG_BUTTONS = [
 
 /*! NAMARI | MIT License | (c) 2026 4n5-Studio */
 /* ============================================================
-   NAMARI — UI: 1) text  2) dialect + conversion  3) voice + TTS
+   NAMARI — waveform: peaks from 16-bit WAV, Canvas 2D bars,
+   progress / playhead synced to an <audio>, click / keys to seek
+   ============================================================ */
+(() => {
+'use strict';
+
+/* 16-bit PCM WAV -> {peaks: Float32Array [min,max,...] per bucket, duration} */
+N.wavPeaks = (bytes, buckets = 1000) => {
+  const info = N.parseWav(bytes);
+  if (!info || info.format !== 1 || info.bits !== 16 || !info.dataLength) return null;
+  const dv = new DataView(bytes.buffer, bytes.byteOffset + info.dataOffset, info.dataLength);
+  const stride = 2 * info.channels;
+  const frames = Math.floor(info.dataLength / stride);
+  const n = Math.max(1, Math.min(buckets, frames));
+  const peaks = new Float32Array(n * 2);
+  for (let b = 0; b < n; b++) {
+    const s = Math.floor((b * frames) / n), e = Math.max(s + 1, Math.floor(((b + 1) * frames) / n));
+    let mn = 0, mx = 0;
+    for (let i = s; i < e; i++) {
+      const v = dv.getInt16(i * stride, true) / 32768;
+      if (v < mn) mn = v;
+      if (v > mx) mx = v;
+    }
+    peaks[b * 2] = mn;
+    peaks[b * 2 + 1] = mx;
+  }
+  return { peaks, duration: info.duration };
+};
+
+const BAR = 3, GAP = 2;                              // CSS px
+
+N.Waveform = class {
+  constructor(canvas, audio) {
+    this.c = canvas;
+    this.a = audio;
+    this.data = null;
+    this.raf = 0;
+    const redraw = () => this.draw();
+    const loop = () => { this.draw(); this.raf = this.a.paused ? 0 : requestAnimationFrame(loop); };
+    audio.addEventListener('play', () => { cancelAnimationFrame(this.raf); this.raf = requestAnimationFrame(loop); });
+    for (const ev of ['pause', 'ended', 'seeked', 'timeupdate', 'loadedmetadata']) audio.addEventListener(ev, redraw);
+    canvas.addEventListener('pointerdown', e => {
+      const d = this.duration();
+      if (!d) return;
+      const r = canvas.getBoundingClientRect();
+      this.seek(((e.clientX - r.left) / r.width) * d);
+    });
+    canvas.addEventListener('keydown', e => {
+      const d = this.duration();
+      if (!d) return;
+      const t = this.a.currentTime;
+      const to = { ArrowLeft: t - 1, ArrowRight: t + 1, Home: 0, End: d }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      this.seek(to);
+    });
+    if (window.ResizeObserver) new ResizeObserver(redraw).observe(canvas);
+    if (window.matchMedia) {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      if (mq.addEventListener) mq.addEventListener('change', redraw);
+    }
+  }
+  duration() { return (isFinite(this.a.duration) && this.a.duration) || (this.data && this.data.duration) || 0; }
+  seek(t) {
+    const d = this.duration();
+    this.a.currentTime = Math.max(0, Math.min(d, t));
+    this.draw();
+  }
+  set(bytes) { this.data = N.wavPeaks(bytes); this.draw(); }
+  clear() { this.data = null; this.draw(); }
+  draw() {
+    const c = this.c, w = c.clientWidth, h = c.clientHeight;
+    if (!w || !h) return;
+    const dpr = window.devicePixelRatio || 1;
+    if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+    const g = c.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, w, h);
+    const css = getComputedStyle(c);
+    const col = name => css.getPropertyValue(name).trim() || '#888';
+    const d = this.duration();
+    const progress = d ? Math.min(1, this.a.currentTime / d) : 0;
+    c.setAttribute('aria-valuemax', d.toFixed(1));
+    c.setAttribute('aria-valuenow', (progress * d).toFixed(1));
+    c.setAttribute('aria-valuetext', `${N.fmtSec(progress * d)} / ${N.fmtSec(d)}`);
+
+    const mid = h / 2;
+    if (!this.data) {
+      g.fillStyle = col('--wave');
+      g.fillRect(0, mid - 0.5, w, 1);
+      return;
+    }
+    const { peaks } = this.data, buckets = peaks.length / 2;
+    let top = 0;
+    for (let i = 0; i < peaks.length; i++) top = Math.max(top, Math.abs(peaks[i]));
+    const gain = top > 0 ? Math.min(1 / top, 8) : 1;          // quiet takes still read as a shape
+    const bars = Math.max(1, Math.floor((w + GAP) / (BAR + GAP)));
+    const played = col('--wave-played'), rest = col('--wave');
+    for (let i = 0; i < bars; i++) {
+      const s = Math.floor((i * buckets) / bars), e = Math.max(s + 1, Math.floor(((i + 1) * buckets) / bars));
+      let amp = 0;
+      for (let b = s; b < e; b++) amp = Math.max(amp, -peaks[b * 2], peaks[b * 2 + 1]);
+      const bh = Math.max(2, amp * gain * (h - 6));
+      g.fillStyle = (i + 0.5) / bars <= progress ? played : rest;
+      const x = i * (BAR + GAP);
+      if (g.roundRect) { g.beginPath(); g.roundRect(x, mid - bh / 2, BAR, bh, 1.5); g.fill(); }
+      else g.fillRect(x, mid - bh / 2, BAR, bh);
+    }
+    if (progress > 0 && progress < 1) {
+      g.fillStyle = col('--wave-head');
+      g.fillRect(Math.round(progress * w) - 1, 0, 2, h);
+    }
+  }
+};
+})();
+
+/*! NAMARI | MIT License | (c) 2026 4n5-Studio */
+/* ============================================================
+   NAMARI — UI: 1) text  2) dialect + conversion  3) voice + TTS,
+   player + waveform, history
    User input and API output are only ever written with textContent.
    ============================================================ */
 (() => {
@@ -909,6 +1236,7 @@ const S = {
   memKey: '',             // fallback when the browser refuses storage
   busy: false,
   audioUrl: null,
+  currentId: null,       // history id shown in the player
   lastArea: 'srcText',    // tag buttons insert into the textarea used last
 };
 S.region = N.dialect(S.dialect).region;
@@ -982,6 +1310,8 @@ function renderRegions() {
     b.addEventListener('click', () => { S.region = r; renderRegions(); renderCards(); });
     box.append(b);
   }
+  const sel = box.querySelector('[aria-selected=true]');           // keep the open tab visible on narrow screens
+  if (sel) box.scrollLeft = Math.max(0, sel.offsetLeft - (box.clientWidth - sel.offsetWidth) / 2);
 }
 function renderCards() {
   const box = $('dialectCards');
@@ -1113,26 +1443,110 @@ async function generate() {
     key, dialect: d, preset, model, text, style: emo.style,
     onRetry: onRetry('genNote'), onStage: st => note('genNote', STAGE[st](d, preset)),
   });
-  showResult(r, { d, preset, model, conv });
-}
-function showResult(r, { d, preset, model, conv }) {
-  if (S.audioUrl) URL.revokeObjectURL(S.audioUrl);
-  S.audioUrl = URL.createObjectURL(new Blob([r.bytes], { type: 'audio/wav' }));
   const dur = (r.info && r.info.duration) || 0;
-  const cost = usd(model, r.usage, Math.round(dur * N.AUDIO_TOKENS_PER_SEC)) + (conv ? usd(N.TEXT_MODEL, conv.usage) : 0);
-  $('player').src = S.audioUrl;
-  $('btnDownload').href = S.audioUrl;
-  $('btnDownload').download = `namari-${d.id}-${N.stamp()}.wav`;
-  $('resultMeta').textContent = `${d.name} · ${N.fmtSec(dur)} · ${N.fmtBytes(r.bytes.length)}` + (cost ? ` · 約 $${cost.toFixed(4)}` : '');
-  $('result').hidden = false;
+  const item = {
+    created: Date.now(), dialectId: d.id, dialectName: d.name,
+    voiceLabel: r.designed ? preset.label : `既定の声 ${r.voice}`, emotionLabel: emo.id === 'none' ? '' : emo.label,
+    model, text, duration: dur, bytes: r.bytes,
+    cost: usd(model, r.usage, Math.round(dur * N.AUDIO_TOKENS_PER_SEC)) + (conv ? usd(N.TEXT_MODEL, conv.usage) : 0),
+  };
+  showAudio(item);
   if (!r.designed) {
     const why = r.voiceError && r.voiceError.message ? `\n（理由: ${r.voiceError.message}）` : '';
     note('genNote', `${d.name}の声を用意できなかったため、既定の声（${r.voice}）で読み上げました。なまりが弱くなることがあります。${why}`, 'warn');
   } else {
     note('genNote', r.voiceCreated ? `できました。${d.name}の声（${preset.label}）を新しく作りました。次回からはすぐに使えます。` : 'できました。', 'ok');
   }
-  $('player').play().catch(() => { /* autoplay may be blocked: the controls are there */ });
+  saveHistory(item);
 }
+
+/* ---------------- result: player + waveform + download ---------------- */
+const wave = new N.Waveform($('wave'), $('player'));
+const fileName = item => `namari-${item.dialectId}-${N.stamp(new Date(item.created))}.wav`;
+const itemTitle = item => [item.dialectName, item.voiceLabel, item.emotionLabel].filter(Boolean).join(' · ');
+function showAudio(item, { autoplay = true } = {}) {
+  if (S.audioUrl) URL.revokeObjectURL(S.audioUrl);
+  S.audioUrl = URL.createObjectURL(new Blob([item.bytes], { type: 'audio/wav' }));
+  S.currentId = item.id || null;
+  $('player').src = S.audioUrl;
+  $('btnDownload').href = S.audioUrl;
+  $('btnDownload').download = fileName(item);
+  $('resultTitle').textContent = itemTitle(item);
+  $('resultMeta').textContent = [N.fmtSec(item.duration || 0), N.fmtBytes(item.bytes.length), item.cost ? `約 $${item.cost.toFixed(4)}` : ''].filter(Boolean).join(' · ');
+  $('result').hidden = false;
+  wave.set(item.bytes);
+  markPlaying();
+  if (autoplay) $('player').play().catch(() => { /* autoplay may be blocked: the controls are there */ });
+}
+
+/* ---------------- history (IndexedDB) ---------------- */
+function fmtWhen(ts) {
+  const d = new Date(ts), p = n => String(n).padStart(2, '0');
+  return `${d.getMonth() + 1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function markPlaying() {
+  for (const li of $('histList').children) li.classList.toggle('playing', S.currentId != null && li.dataset.id === String(S.currentId));
+}
+async function saveHistory(item) {
+  if (!N.history.available) return;
+  try {
+    item.id = await N.history.add(item);
+    S.currentId = item.id;
+    await renderHistory();
+  } catch (err) {
+    note('histNote', '履歴に保存できませんでした（ブラウザの保存容量やプライベートモードの制限の可能性があります）。', 'warn');
+  }
+}
+function downloadItem(item) {
+  const url = URL.createObjectURL(new Blob([item.bytes], { type: 'audio/wav' }));
+  const a = el('a', { href: url, download: fileName(item) });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+async function renderHistory() {
+  const list = $('histList');
+  if (!N.history.available) {
+    list.textContent = '';
+    $('histEmpty').textContent = 'このブラウザでは履歴を保存できません。';
+    $('btnHistClear').hidden = true;
+    return;
+  }
+  let items = [];
+  try { items = await N.history.list(); } catch (err) {
+    $('histEmpty').textContent = '履歴を読み込めませんでした（プライベートモードなどでは保存できません）。';
+  }
+  list.textContent = '';
+  for (const item of items) {
+    const li = el('li', { class: 'hist-item', 'data-id': String(item.id) });
+    const main = el('div', { class: 'hist-main' },
+      el('span', { class: 'hist-title' }, itemTitle(item)),
+      el('span', { class: 'hist-meta' }, `${fmtWhen(item.created)} · ${N.fmtSec(item.duration || 0)}`),
+      el('span', { class: 'hist-text' }, item.text || ''));
+    const acts = el('div', { class: 'hist-actions' });
+    const btn = (label, cls, fn, aria) => { const b = el('button', { type: 'button', class: cls, 'aria-label': `${aria}：${itemTitle(item)} ${fmtWhen(item.created)}` }, label); b.addEventListener('click', fn); acts.append(b); };
+    btn('再生', 'small', () => { showAudio(item); $('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, '再生');
+    btn('保存', 'small ghost', () => downloadItem(item), 'WAVを保存');
+    btn('削除', 'small ghost', async () => {
+      try { await N.history.del(item.id); } catch (err) { note('histNote', '削除できませんでした。', 'ng'); }
+      if (S.currentId === item.id) S.currentId = null;
+      renderHistory();
+    }, '削除');
+    li.append(main, acts);
+    list.append(li);
+  }
+  $('histCount').textContent = items.length ? `${items.length} / ${N.HISTORY_MAX}件` : '';
+  $('histEmpty').hidden = items.length > 0;
+  $('btnHistClear').hidden = !items.length;
+  markPlaying();
+}
+$('btnHistClear').addEventListener('click', async () => {
+  if (!confirm('履歴をすべて削除します。よろしいですか？（Google 側の声は削除されません）')) return;
+  try { await N.history.clear(); note('histNote', '履歴をすべて削除しました。', 'ok'); } catch (err) { note('histNote', '削除できませんでした。', 'ng'); }
+  S.currentId = null;
+  renderHistory();
+});
 $('btnGenerate').addEventListener('click', async () => {
   if (S.busy) return;
   setBusy(true, '生成中…');
@@ -1235,6 +1649,7 @@ updateAutoVoiceLabel();
 updatePriceNote();
 updateCount();
 updateBadge();
+renderHistory();
 if (!getKey()) openSettings();
 })();
 

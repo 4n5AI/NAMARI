@@ -53,6 +53,8 @@
       <button id="btnGenerate" type="button" class="primary big">音声を生成</button>
       <p id="genNote" class="note" aria-live="polite"></p>
       <div id="result" class="result" hidden>
+        <div class="result-head"><span id="resultTitle" class="result-title"></span></div>
+        <canvas id="wave" class="wave" role="slider" tabindex="0" aria-label="再生位置（クリック・左右キーで移動）" aria-valuemin="0"></canvas>
         <audio id="player" controls preload="auto"></audio>
         <div class="row between">
           <a id="btnDownload" class="button" download>WAVをダウンロード</a>
@@ -60,6 +62,15 @@
         </div>
       </div>
       <p id="priceNote" class="hint"></p>
+    </section>
+
+    <!-- ================= history ================= -->
+    <section class="step history" aria-labelledby="hH">
+      <h2 id="hH"><span class="num num-icon" aria-hidden="true">↺</span>履歴<span id="histCount" class="sub"></span>
+        <button id="btnHistClear" type="button" class="ghost small push">すべて削除</button></h2>
+      <p id="histNote" class="note" aria-live="polite"></p>
+      <ol id="histList" class="hist-list"></ol>
+      <p id="histEmpty" class="hint">まだ履歴はありません。生成した音声は、このブラウザに最新20件まで保存されます。</p>
     </section>
   </main>
 
@@ -127,7 +138,7 @@
     <h3>生成した音声</h3>
     <p>生成した音声の扱いは、<a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Gemini API 利用規約</a>に従ってください。生成音声には Google の SynthID による電子透かしが入ります。</p>
     <h3>送信するデータ</h3>
-    <p>入力したテキストとAPIキーは、Gemini API（generativelanguage.googleapis.com）以外には送信しません。キーはこのブラウザにだけ保存され、「設定」からいつでも削除できます。方言の変換と読み上げのリクエストは、Google 側に保存しない設定（store: false）で送っています。</p>
+    <p>入力したテキストとAPIキーは、Gemini API（generativelanguage.googleapis.com）以外には送信しません。キーと履歴（生成した音声）はこのブラウザにだけ保存され、いつでも削除できます。方言の変換と読み上げのリクエストは、Google 側に保存しない設定（store: false）で送っています。</p>
     <h3>料金の目安（有料枠・2026年12月末まで）</h3>
     <table class="price">
       <thead><tr><th>処理</th><th>入力</th><th>出力</th></tr></thead>
