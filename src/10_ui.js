@@ -49,7 +49,7 @@ function note(id, msg, kind = '', action = null) {
     p.append(b);
   }
 }
-const openSettingsAction = { label: '設定を開く', run: () => openSettings() };
+const openSettingsAction = { label: '設定を開く', run: () => openSettings('key') };
 function showError(id, err) {
   if (err && err.name === 'AbortError') return;
   if (err instanceof N.ApiError) {
@@ -403,7 +403,28 @@ function renderKeyState() {
   $('btnVoicesDelete').disabled = !n;
   updateBadge();
 }
-function openSettings() {
+/* settings dialog = three tabs: 設定 (key) / 使い方 (help) / AI連携 (ai) */
+const TABS = { key: ['tabKey', 'panelKey'], help: ['tabHelp', 'panelHelp'], ai: ['tabAI', 'panelAI'] };
+function showTab(name, focusTab) {
+  for (const [k, [tab, panel]] of Object.entries(TABS)) {
+    const on = k === name;
+    $(tab).setAttribute('aria-selected', String(on));
+    $(tab).tabIndex = on ? 0 : -1;
+    $(panel).hidden = !on;
+  }
+  if (name === 'ai') renderAiTab();
+  if (focusTab) $(TABS[name][0]).focus();
+  $('dlgSettings').scrollTop = 0;
+}
+for (const [k, [tab]] of Object.entries(TABS)) $(tab).addEventListener('click', () => showTab(k));
+$('settingsTabs').addEventListener('keydown', e => {                   // arrow keys move between tabs (WAI-ARIA tabs)
+  const keys = Object.keys(TABS), cur = keys.findIndex(k => $(TABS[k][0]).getAttribute('aria-selected') === 'true');
+  const to = { ArrowRight: cur + 1, ArrowLeft: cur - 1, Home: 0, End: keys.length - 1 }[e.key];
+  if (to === undefined) return;
+  e.preventDefault();
+  showTab(keys[(to + keys.length) % keys.length], true);
+});
+function openSettings(tab = 'key') {
   const dlg = $('dlgSettings');
   $('keyInput').value = '';
   $('keyInput').type = 'password';
@@ -412,11 +433,42 @@ function openSettings() {
   note('voicesNote', '');
   $('referrerExample').textContent = /\.github\.io$/.test(location.hostname) ? `${location.origin}/*` : 'https://<GitHubユーザー名>.github.io/*';
   renderKeyState();
+  showTab(tab);
   if (!dlg.open) dlg.showModal();
-  $('keyInput').focus();
+  if (tab === 'key') $('keyInput').focus(); else $(TABS[tab][0]).focus();
 }
-$('btnSettings').addEventListener('click', openSettings);
+$('btnSettings').addEventListener('click', () => openSettings('key'));
+$('btnHelp').addEventListener('click', () => openSettings('help'));
+$('btnAI').addEventListener('click', () => openSettings('ai'));
 $('btnSettingsClose').addEventListener('click', () => $('dlgSettings').close());
+$('btnSettingsX').addEventListener('click', () => $('dlgSettings').close());
+for (const b of document.querySelectorAll('#dlgSettings [data-close]')) b.addEventListener('click', () => $('dlgSettings').close());
+
+/* AI tab: the instruction text for chat AIs (built from the dialect data, so it never goes stale) and the current link */
+function renderAiTab() {
+  $('aiPrompt').textContent = [
+    '方言読み上げツール「NAMARI」のリンクを作ってください。',
+    '私が日本語の文章を方言で読み上げたいと言ったら、次の形式のリンクを作って渡してください（値は URL エンコードする）。',
+    `${N.APP_URL}#text=<標準語の文章>&dialect=<方言ID>&voice=<声>&emotion=<感情>`,
+    `- dialect（方言ID）: ${N.DIALECTS.map(d => `${d.id}=${d.name}`).join(', ')}`,
+    `- voice（省略可）: auto, ${N.VOICE_PRESETS.map(p => `${p.id}=${p.label}`).join(', ')}`,
+    `- emotion（省略可）: ${N.EMOTIONS.filter(e => e.id !== 'none').map(e => `${e.id}=${e.label}`).join(', ')}`,
+    '- strength（方言の強さ・省略可）: weak, mid, strong',
+    '- あなたが方言に書き換えた文章を使うときは、dialect_text=<方言の文章> を付ける。',
+    '- 笑い・ため息・間は <laugh> <sigh> <short pause> のように英語のタグで文中に入れられる。',
+  ].join('\n');
+  $('curLink').value = currentLink();
+}
+for (const b of document.querySelectorAll('.copy-btn')) {
+  b.addEventListener('click', async () => {
+    const src = $(b.dataset.copy);
+    const text = 'value' in src && src.tagName === 'INPUT' ? src.value : src.textContent;
+    const label = b.textContent;
+    try { await navigator.clipboard.writeText(text); b.textContent = 'コピーしました'; }
+    catch (err) { if (src.select) src.select(); b.textContent = '選択しました'; }
+    setTimeout(() => { b.textContent = label; }, 1600);
+  });
+}
 $('btnKeyShow').addEventListener('click', () => {
   const show = $('keyInput').type === 'password';
   $('keyInput').type = show ? 'text' : 'password';
@@ -707,6 +759,38 @@ $('btnVidCancel').addEventListener('click', () => { if (vidAbort) vidAbort.abort
 $('btnVidClose').addEventListener('click', () => $('dlgVideo').close());
 $('dlgVideo').addEventListener('close', () => { if (vidAbort) vidAbort.abort(); $('vidPlayer').pause(); });
 
+/* ---------------- links: #text=...&dialect=... fills the form (never generates by itself) ---------------- */
+function applyLink() {
+  const p = N.parseLink(location.hash);
+  if (!Object.keys(p).length) return;
+  history.replaceState(null, '', location.pathname + location.search);      // keep the text out of the address bar / history
+  const filled = [];
+  if (p.text) { $('srcText').value = p.text.slice(0, MAX_CHARS); updateCount(); filled.push('テキスト'); }
+  const d = p.dialect ? N.findDialect(p.dialect) : null;
+  if (d) { S.region = d.region; selectDialect(d.id); filled.push(d.name); }
+  if (p.strength && N.STRENGTHS.some(x => x.id === p.strength)) { S.strength = p.strength; renderStrength(); }
+  if (p.dialect_text) { $('dialectText').value = p.dialect_text.slice(0, 2000); S.converted = null; filled.push('方言テキスト'); }
+  if (p.voice) {
+    const v = p.voice === 'auto' || N.VOICE_PRESETS.some(x => x.id === p.voice) ? p.voice : N.myVoices.get(p.voice) ? OWN + p.voice : null;
+    if (v) renderVoiceSelect(v);
+  }
+  if (p.emotion && N.EMOTIONS.some(x => x.id === p.emotion)) $('emotion').value = p.emotion;
+  const m = { flash: 'gemini-3.8-flash-tts', lite: 'gemini-3.8-flash-lite-tts' }[p.model] || p.model;
+  if (m && N.TTS_MODELS.some(x => x.id === m)) { $('model').value = m; updatePriceNote(); }
+  updateStale();
+  note('linkNote', `リンクから入力しました（${filled.join('・') || '設定'}）。内容を確認して「音声を生成」を押してください。自動では生成しません。`, 'ok');
+}
+window.addEventListener('hashchange', applyLink);
+/* the link for what is on screen now (AI integration tab) */
+const currentLink = () => {
+  const v = $('voicePreset').value;
+  return N.buildLink({
+    text: $('srcText').value.trim(), dialect_text: $('dialectText').value.trim() !== ($('srcText').value.trim()) ? $('dialectText').value.trim() : '',
+    dialect: S.dialect, strength: S.strength, voice: v.startsWith(OWN) ? v.slice(OWN.length) : v,
+    emotion: $('emotion').value === 'none' ? '' : $('emotion').value, model: /lite/.test($('model').value) ? 'lite' : '',
+  }, location.origin + location.pathname);
+};
+
 /* ---------------- terms dialog ---------------- */
 $('btnTerms').addEventListener('click', () => $('dlgTerms').showModal());
 $('btnTermsClose').addEventListener('click', () => $('dlgTerms').close());
@@ -727,5 +811,6 @@ updatePriceNote();
 updateCount();
 updateBadge();
 renderHistory();
-if (!getKey()) openSettings();
+applyLink();
+if (!getKey()) openSettings('key');
 })();

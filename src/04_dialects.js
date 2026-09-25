@@ -176,6 +176,32 @@ N.EMOTIONS = [
   { id: 'sad', label: 'しんみり', style: 'sad and quiet' },
 ];
 
+/* dialect from an id or a Japanese name: "osaka" / "大阪弁" / "大阪" / "沖縄" (a region with one dialect) */
+N.findDialect = query => {
+  const q = String(query || '').trim().toLowerCase();
+  if (!q) return null;
+  return N.DIALECTS.find(d => d.id === q)
+    || N.DIALECTS.find(d => d.name === q || d.name.replace(/弁$/, '') === q || d.name.split('（')[0] === q)
+    || N.DIALECTS.find(d => d.name.startsWith(q) || q.startsWith(d.name.replace(/弁$/, '')))
+    || ((list => (list.length === 1 ? list[0] : null))(N.DIALECTS.filter(d => d.region === q)));
+};
+
+/* ---------- links: open the app with the form filled in (used by AI chats and the MCP server) ----------
+   Everything travels in the URL fragment (#...), which browsers never send to the server. */
+N.APP_URL = 'https://4n5ai.github.io/NAMARI/';
+N.LINK_KEYS = ['text', 'dialect_text', 'dialect', 'strength', 'voice', 'emotion', 'model'];
+N.buildLink = (params, base = N.APP_URL) => {
+  const q = new URLSearchParams();
+  for (const k of N.LINK_KEYS) if (params && params[k] != null && String(params[k]).trim()) q.set(k, String(params[k]).trim());
+  return base.split('#')[0] + (q.toString() ? '#' + q : '');
+};
+N.parseLink = hash => {
+  const q = new URLSearchParams(String(hash || '').replace(/^#/, ''));
+  const out = {};
+  for (const k of N.LINK_KEYS) { const v = q.get(k); if (v && v.trim()) out[k] = v; }
+  return out;
+};
+
 /* inline tags (official Gemini 3.8 TTS vocal tags; they stay in English even inside Japanese text).
    quick: shown as buttons under the text box; the rest open from 「その他のタグ」 */
 N.TAG_GROUPS = [
